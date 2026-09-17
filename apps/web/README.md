@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
+# UrbanNest (Web Application)
+
+Modern Furniture & Home Decor e-commerce platform built with Next.js App Router, Tailwind CSS, ShadCN UI, Zustand, TanStack Query, and Supabase.
+
+## Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) v4 & [ShadCN UI](https://ui.shadcn.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **State Management**: [Zustand](https://github.com/pmndrs/zustand) (Client) & [TanStack Query](https://tanstack.com/query) (Server)
+- **Validation**: [Zod](https://zod.dev/)
+- **Backend / Auth / DB**: [Supabase](https://supabase.com/)
+
+## Architecture Overview
+
+```text
+apps/web/
+├── app/                  # Next.js App Router (pages, layouts, route handlers)
+├── components/
+│   ├── ui/              # ShadCN atomic primitive components (Button, Input, Dialog, etc.)
+│   ├── layout/          # Layout components (Navbar, Footer, Sidebar, Header)
+│   └── shared/          # Reusable cross-feature components (ProductCard, EmptyState, etc.)
+├── features/            # Feature-sliced business modules
+│   ├── auth/            # Auth forms, user session, guards
+│   ├── products/        # Catalog, product details, filters, sorting
+│   ├── cart/            # Cart drawer, cart line items, pricing calculation
+│   ├── orders/          # Checkout flow, order history, order status
+│   └── admin/           # Admin dashboard, inventory management, product forms
+├── lib/                 # Core infrastructure and utilities
+│   ├── supabase/        # Supabase browser, server, and admin clients
+│   ├── validations/     # Zod schemas for input validation
+│   ├── constants/       # App-wide constants, navigation links, config
+│   └── utils/           # Utility functions (cn, formatters, calculations)
+├── hooks/               # Custom reusable React hooks
+├── providers/           # Context providers (QueryClientProvider, ThemeProvider, etc.)
+├── stores/              # Zustand global client state stores (cartStore, uiStore, etc.)
+└── types/               # Global TypeScript declarations, database schemas, API types
+```
 
 ## Getting Started
 
-First, run the development server:
+Run the development server from the monorepo root:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Or run directly inside `apps/web`:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm --filter web dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
