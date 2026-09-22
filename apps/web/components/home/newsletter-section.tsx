@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export function NewsletterSection() {
   return (
-    <section className="py-16 sm:py-20 lg:py-28 bg-[#F8F6F2]">
+    <section className="pt-12 sm:pt-14 lg:pt-[60px] pb-8 sm:pb-10 lg:pb-10 bg-[#F8F6F2]">
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <MotionWrapper>
           <div className="rounded-[32px] bg-[#313A29] px-8 py-12 sm:px-14 sm:py-16 lg:px-20 lg:py-20 flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-16 shadow-sm border border-[#E5E2DC]/30">

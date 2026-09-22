@@ -148,6 +148,59 @@ export async function getFeaturedProducts(
 }
 
 /**
+ * Fetch related products for the current product (by category or featured).
+ */
+export async function getRelatedProducts(
+  currentSlug: string,
+  categoryId?: string | null,
+  limit: number = 4,
+  client?: any
+): Promise<CatalogProduct[]> {
+  const supabase = getSupabase(client);
+
+  let query = supabase
+    .from("products")
+    .select(`
+      id,
+      title,
+      slug,
+      description,
+      price,
+      compare_at_price,
+      stock,
+      images,
+      category_id,
+      is_featured,
+      is_published,
+      created_at,
+      category:categories (
+        id,
+        name,
+        slug,
+        description
+      )
+    `)
+    .eq("is_published", true)
+    .neq("slug", currentSlug);
+
+  if (categoryId) {
+    query = query.eq("category_id", categoryId);
+  }
+
+  query = query.limit(limit);
+
+  const { data, error } = await query;
+
+  if (error || !data || data.length === 0) {
+    // Fallback to featured or any other products
+    const fallback = await getProducts({ limit: limit + 1 }, client);
+    return fallback.filter((p) => p.slug !== currentSlug).slice(0, limit);
+  }
+
+  return data as unknown as CatalogProduct[];
+}
+
+/**
  * Fetch categories for catalog navigation filters.
  */
 export async function getCategories(client?: any): Promise<ProductCategory[]> {

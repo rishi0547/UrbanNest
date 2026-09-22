@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/features/auth/components/logout-button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -90,11 +92,20 @@ export default async function ProfilePage() {
           </div>
         </CardContent>
 
-        <CardFooter className="flex justify-between border-t border-border/50 pt-6">
+        <CardFooter className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-border/50 pt-6">
           <p className="text-xs text-muted-foreground">
             Signed in securely via Supabase Auth
           </p>
-          <LogoutButton variant="outline" />
+          <div className="flex items-center gap-3">
+            {role === "admin" && (
+              <Link href="/admin">
+                <Button size="sm" className="bg-[#5D6B4D] hover:bg-[#4E5A40] text-white">
+                  Admin Dashboard →
+                </Button>
+              </Link>
+            )}
+            <LogoutButton variant="outline" />
+          </div>
         </CardFooter>
       </Card>
     </main>

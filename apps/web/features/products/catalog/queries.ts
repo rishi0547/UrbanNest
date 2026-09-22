@@ -6,6 +6,7 @@ import {
   getProducts,
   getProductBySlug,
   getFeaturedProducts,
+  getRelatedProducts,
   getCategories,
 } from "./api";
 import type { CatalogFilterOptions } from "./types";
@@ -38,6 +39,21 @@ export function useFeaturedProducts(limit: number = 4) {
   return useQuery({
     queryKey: productQueryKeys.featured(limit),
     queryFn: () => getFeaturedProducts(limit),
+  });
+}
+
+/**
+ * Hook to retrieve related products for recommendations.
+ */
+export function useRelatedProducts(
+  currentSlug: string,
+  categoryId?: string | null,
+  limit: number = 4
+) {
+  return useQuery({
+    queryKey: productQueryKeys.related(currentSlug, limit),
+    queryFn: () => getRelatedProducts(currentSlug, categoryId, limit),
+    enabled: Boolean(currentSlug),
   });
 }
 

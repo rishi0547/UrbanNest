@@ -27,7 +27,7 @@ const categories = [
 
 export function CategoriesSection() {
   return (
-    <section className="py-16 sm:py-20 lg:py-24 bg-[#F8F6F2]">
+    <section className="pt-8 sm:pt-10 lg:pt-10 pb-10 sm:pb-12 lg:pb-[50px] bg-[#F8F6F2]">
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <MotionWrapper>
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-5 sm:gap-6 lg:gap-8 justify-items-center items-start">

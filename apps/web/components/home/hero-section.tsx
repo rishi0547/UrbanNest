@@ -15,7 +15,7 @@ const avatarUrls = [
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-[#F8F6F2] py-16 sm:py-20 lg:py-24">
+    <section className="relative overflow-hidden bg-[#F8F6F2] pt-12 sm:pt-16 lg:pt-16 pb-8 sm:pb-10 lg:pb-10">
       {/* Single Centered Content Container */}
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-14 items-center">

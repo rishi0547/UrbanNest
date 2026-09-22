@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 
 export function PromoBanner() {
   return (
-    <section className="py-16 sm:py-20 lg:py-28 bg-[#F8F6F2]">
+    <section className="pt-10 sm:pt-12 lg:pt-[50px] pb-8 sm:pb-10 lg:pb-10 bg-[#F8F6F2]">
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <MotionWrapper>
           <div className="relative rounded-[32px] overflow-hidden grid grid-cols-1 lg:grid-cols-12 bg-[#313A29] shadow-sm border border-[#E5E2DC]/40 min-h-[380px] lg:min-h-[440px]">

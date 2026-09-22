@@ -13,5 +13,7 @@ export const productQueryKeys = {
   detail: (slug: string) => [...productQueryKeys.details(), slug] as const,
   featured: (limit?: number) =>
     [...productQueryKeys.all, "featured", limit ?? 4] as const,
+  related: (slug: string, limit?: number) =>
+    [...productQueryKeys.all, "related", slug, limit ?? 4] as const,
   categories: () => ["categories"] as const,
 };

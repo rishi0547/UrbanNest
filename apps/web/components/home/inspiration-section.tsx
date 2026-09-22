@@ -35,7 +35,7 @@ const articles = [
 
 export function InspirationSection() {
   return (
-    <section className="py-16 sm:py-20 lg:py-28 bg-[#F8F6F2]">
+    <section className="pt-10 sm:pt-12 lg:pt-[50px] pb-12 sm:pb-14 lg:pb-[60px] bg-[#F8F6F2]">
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
           {/* Left Text Content (3 cols) */}

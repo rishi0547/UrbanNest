@@ -27,7 +27,7 @@ const footerLinks = {
 
 export function SiteFooter() {
   return (
-    <footer className="bg-[#F8F6F2] border-t border-[#E5E2DC] pt-20 pb-16 lg:pt-28 lg:pb-20 text-[#1A1A1A]">
+    <footer className="bg-[#F8F6F2] border-t border-[#E5E2DC] pt-8 sm:pt-10 lg:pt-10 pb-12 sm:pb-16 lg:pb-16 text-[#1A1A1A]">
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         {/* Four Column Balanced Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-16 items-start">

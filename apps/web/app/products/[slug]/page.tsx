@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/lib/query-client";
 import { productQueryKeys } from "@/features/products/catalog/query-keys";
-import { getProductBySlug } from "@/features/products/catalog/api";
+import { getProductBySlug, getRelatedProducts } from "@/features/products/catalog/api";
 import { ProductDetailsView } from "@/features/products/catalog/components/product-details-view";
 import { StorefrontNav } from "@/components/storefront-nav";
+import { SiteFooter } from "@/components/home/site-footer";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -27,7 +28,7 @@ export async function generateMetadata({
   const thumbnail = product.images?.[0];
 
   return {
-    title: `${product.title} | UrbanNest Design Studio`,
+    title: `${product.title} | UrbanNest Luxury Living`,
     description: product.description.slice(0, 160),
     openGraph: {
       title: `${product.title} | UrbanNest`,
@@ -51,21 +52,29 @@ export default async function ProductDetailPage({
     notFound();
   }
 
-  // Prefetch into server query cache for instant initial paint
+  // Prefetch product details into server query cache
   await queryClient.prefetchQuery({
     queryKey: productQueryKeys.detail(slug),
     queryFn: () => product,
   });
 
+  // Prefetch related recommendations
+  await queryClient.prefetchQuery({
+    queryKey: productQueryKeys.related(slug, 4),
+    queryFn: () => getRelatedProducts(slug, product.category_id, 4),
+  });
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="flex flex-col bg-[#F8F6F2]">
       <StorefrontNav />
 
-      <main className="container mx-auto max-w-7xl flex-1 px-4 sm:px-6 py-10">
+      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-10 pb-0">
         <HydrationBoundary state={dehydrate(queryClient)}>
           <ProductDetailsView slug={slug} />
         </HydrationBoundary>
       </main>
+
+      <SiteFooter />
     </div>
   );
 }

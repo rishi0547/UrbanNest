@@ -28,7 +28,7 @@ const features = [
 
 export function TrustBadges() {
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-[#F8F6F2]">
+    <section className="pt-8 sm:pt-10 lg:pt-10 pb-10 sm:pb-12 lg:pb-[50px] bg-[#F8F6F2]">
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <MotionWrapper>
           <div className="bg-white rounded-2xl border border-[#E5E2DC] py-10 sm:py-12 px-8 sm:px-12 shadow-2xs">
