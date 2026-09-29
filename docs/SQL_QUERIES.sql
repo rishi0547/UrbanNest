@@ -480,3 +480,629 @@ USING (
 );
 
 
+-- ==============================================================================
+-- SECTION 10: PHASE 1 CHECKOUT & ORDER CREATION MIGRATION
+-- ==============================================================================
+
+-- 10.1 ORDERS TABLE (Phase 1 Specifications)
+-- What it does: Creates the transactional orders table storing total charges, status lifecycle, and shipping details.
+-- Why it is needed: Serves as the single source of truth for customer purchase orders and fulfillment tracking.
+CREATE TABLE IF NOT EXISTS public.orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled')),
+  subtotal NUMERIC NOT NULL DEFAULT 0 CHECK (subtotal >= 0),
+  shipping NUMERIC NOT NULL DEFAULT 0 CHECK (shipping >= 0),
+  tax NUMERIC NOT NULL DEFAULT 0 CHECK (tax >= 0),
+  total NUMERIC NOT NULL DEFAULT 0 CHECK (total >= 0),
+  shipping_address JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Trigger for orders.updated_at
+DROP TRIGGER IF EXISTS set_orders_updated_at ON public.orders;
+CREATE TRIGGER set_orders_updated_at
+BEFORE UPDATE ON public.orders
+FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+-- 10.2 ORDER ITEMS TABLE (Phase 1 Specifications)
+-- What it does: Stores line items purchased in an order with historical snapshot pricing.
+-- Why it is needed: Preserves immutable price and product naming at time of purchase against future catalog alterations.
+CREATE TABLE IF NOT EXISTS public.order_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+  product_id UUID REFERENCES public.products(id) ON DELETE SET NULL,
+  product_name TEXT NOT NULL,
+  product_price NUMERIC NOT NULL DEFAULT 0 CHECK (product_price >= 0),
+  quantity INTEGER NOT NULL CHECK (quantity > 0),
+  line_total NUMERIC NOT NULL DEFAULT 0 CHECK (line_total >= 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 10.3 PERFORMANCE INDEXES
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON public.orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at ON public.orders(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON public.order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_product_id ON public.order_items(product_id);
+
+-- 10.4 ENABLE ROW LEVEL SECURITY
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
+
+-- 10.5 ROW LEVEL SECURITY POLICIES FOR ORDERS
+
+-- Customer can only see their orders
+DROP POLICY IF EXISTS "Customer can view own orders" ON public.orders;
+CREATE POLICY "Customer can view own orders" ON public.orders
+  FOR SELECT TO authenticated
+  USING (auth.uid() = user_id);
+
+-- Admin can see all orders
+DROP POLICY IF EXISTS "Admin can view all orders" ON public.orders;
+CREATE POLICY "Admin can view all orders" ON public.orders
+  FOR SELECT TO authenticated
+  USING (public.is_admin());
+
+-- Customer can create own orders
+DROP POLICY IF EXISTS "Customer can insert own orders" ON public.orders;
+CREATE POLICY "Customer can insert own orders" ON public.orders
+  FOR INSERT TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+-- Admin can update orders (e.g. status transition)
+DROP POLICY IF EXISTS "Admin can update orders" ON public.orders;
+CREATE POLICY "Admin can update orders" ON public.orders
+  FOR UPDATE TO authenticated
+  USING (public.is_admin());
+
+-- 10.6 ROW LEVEL SECURITY POLICIES FOR ORDER ITEMS
+
+-- Customer can view own order items (tied to parent order)
+DROP POLICY IF EXISTS "Customer can view own order items" ON public.order_items;
+CREATE POLICY "Customer can view own order items" ON public.order_items
+  FOR SELECT TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.orders
+      WHERE orders.id = order_items.order_id
+      AND orders.user_id = auth.uid()
+    )
+  );
+
+-- Admin can view all order items
+DROP POLICY IF EXISTS "Admin can view all order items" ON public.order_items;
+CREATE POLICY "Admin can view all order items" ON public.order_items
+  FOR SELECT TO authenticated
+  USING (public.is_admin());
+
+-- Customer can insert items for own order
+DROP POLICY IF EXISTS "Customer can insert own order items" ON public.order_items;
+CREATE POLICY "Customer can insert own order items" ON public.order_items
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.orders
+      WHERE orders.id = order_items.order_id
+      AND orders.user_id = auth.uid()
+    )
+  );
+
+
+-- ==============================================================================
+-- SECTION 11: EXPANDED 30-PIECE LUXURY FURNITURE CATALOG INSERTION
+-- Target Engine: PostgreSQL 15+ (Supabase SQL Editor Ready)
+-- Expands catalog to 34 products across Living, Bedroom, Dining, Office, and Storage
+-- ==============================================================================
+
+-- 11.1 INSERT STORAGE CATEGORY
+INSERT INTO public.categories (id, name, slug, description, image_url)
+VALUES (
+  '55555555-5555-5555-5555-555555555555',
+  'Storage',
+  'storage',
+  'Cabinets, bookshelves, consoles, and architectural credenzas.',
+  'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=1200&q=80'
+)
+ON CONFLICT (slug) DO NOTHING;
+
+-- 11.2 INSERT 30 REALISTIC LUXURY FURNITURE PRODUCTS
+INSERT INTO public.products (
+  id, title, slug, description, price, compare_at_price, stock, images, category_id, is_featured, is_published
+) VALUES
+-- Living Room Pieces
+(
+  'e1111111-0001-4000-8000-000000000001',
+  'Kōben Low Walnut Coffee Table',
+  'koben-low-walnut-coffee-table',
+  'Sculptural low-slung table with radiused corners, integrated dual storage surfaces, and solid American walnut grain.',
+  640.00,
+  720.00,
+  14,
+  ARRAY['https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=1000&q=80', 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1000&q=80'],
+  '11111111-1111-1111-1111-111111111111',
+  TRUE,
+  TRUE
+),
+(
+  'e1111111-0002-4000-8000-000000000002',
+  'Neva Travertine Accent Side Table',
+  'neva-travertine-accent-side-table',
+  'Hand-carved circular Italian travertine side table featuring organic porous texture and brutalist monolithic profile.',
+  480.00,
+  NULL,
+  19,
+  ARRAY['https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=1000&q=80'],
+  '11111111-1111-1111-1111-111111111111',
+  FALSE,
+  TRUE
+),
+(
+  'e1111111-0003-4000-8000-000000000003',
+  'Koto Sculptural 3-Seater Sofa',
+  'koto-sculptural-3-seater-sofa',
+  'Sweeping architectural curves covered in soft textured oatmeal weave, anchored by low-profile black ash block feet.',
+  2150.00,
+  2400.00,
+  7,
+  ARRAY['https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=1000&q=80', 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1000&q=80'],
+  '11111111-1111-1111-1111-111111111111',
+  TRUE,
+  TRUE
+),
+(
+  'e1111111-0004-4000-8000-000000000004',
+  'Oslo Linen Daybed Lounge',
+  'oslo-linen-daybed-lounge',
+  'Versatile lounge daybed crafted from solid oak timbers with a tufted Belgian linen mattress cushion and bolster pillow.',
+  1290.00,
+  1450.00,
+  9,
+  ARRAY['https://images.unsplash.com/photo-1540518614846-7ede433c4550?w=1000&q=80'],
+  '11111111-1111-1111-1111-111111111111',
+  FALSE,
+  TRUE
+),
+(
+  'e1111111-0005-4000-8000-000000000005',
+  'Kyoto Fluted Oak Coffee Table',
+  'kyoto-fluted-oak-coffee-table',
+  'Round architectural cocktail table wrapped in vertical solid white oak fluting with a durable matte polyurethane finish.',
+  790.00,
+  NULL,
+  11,
+  ARRAY['https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=1000&q=80'],
+  '11111111-1111-1111-1111-111111111111',
+  FALSE,
+  TRUE
+),
+(
+  'e1111111-0006-4000-8000-000000000006',
+  'Bauhaus Saddle Leather Armchair',
+  'bauhaus-saddle-leather-armchair',
+  'Tubular stainless steel cantilever frame suspended with full-grain cognac saddle leather and hand-stitched borders.',
+  940.00,
+  1100.00,
+  12,
+  ARRAY['https://images.unsplash.com/photo-1580481077197-04877be1c70e?w=1000&q=80'],
+  '11111111-1111-1111-1111-111111111111',
+  TRUE,
+  TRUE
+),
+-- Bedroom Pieces
+(
+  'e2222222-0001-4000-8000-000000000001',
+  'Maru Solid Ash Nightstand',
+  'maru-solid-ash-nightstand',
+  'Compact bedside table with a soft-close dovetail drawer, open storage shelf, and organic rounded chamfered edges.',
+  380.00,
+  430.00,
+  22,
+  ARRAY['https://images.unsplash.com/photo-1532372576444-dda954194ad0?w=1000&q=80'],
+  '22222222-2222-2222-2222-222222222222',
+  FALSE,
+  TRUE
+),
+(
+  'e2222222-0002-4000-8000-000000000002',
+  'Aalto 6-Drawer Walnut Dresser',
+  'aalto-6-drawer-walnut-dresser',
+  'Wide double dresser featuring continuous book-matched walnut veneer, sculpted finger pulls, and concealed Blum runners.',
+  1750.00,
+  1950.00,
+  6,
+  ARRAY['https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=1000&q=80'],
+  '22222222-2222-2222-2222-222222222222',
+  TRUE,
+  TRUE
+),
+(
+  'e2222222-0003-4000-8000-000000000003',
+  'Ren Minimalist Upholstered Bed',
+  'ren-minimalist-upholstered-bed',
+  'Low profile shelter platform bed wrapped in neutral textured linen with integrated solid wood inner slats.',
+  1480.00,
+  NULL,
+  8,
+  ARRAY['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1000&q=80'],
+  '22222222-2222-2222-2222-222222222222',
+  TRUE,
+  TRUE
+),
+(
+  'e2222222-0004-4000-8000-000000000004',
+  'Tsubaki Low Floating Nightstand',
+  'tsubaki-low-floating-nightstand',
+  'Wall-mounted cantilevered nightstand in solid white oak, offering minimalist cord management and a hidden tray drawer.',
+  320.00,
+  360.00,
+  16,
+  ARRAY['https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=1000&q=80'],
+  '22222222-2222-2222-2222-222222222222',
+  FALSE,
+  TRUE
+),
+(
+  'e2222222-0005-4000-8000-000000000005',
+  'Hans Tallboy 5-Drawer Dresser',
+  'hans-tallboy-5-drawer-dresser',
+  'Vertical space-saving chest of drawers with solid oak legs and matte lacquered drawer facades.',
+  1120.00,
+  1280.00,
+  10,
+  ARRAY['https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=1000&q=80'],
+  '22222222-2222-2222-2222-222222222222',
+  FALSE,
+  TRUE
+),
+(
+  'e2222222-0006-4000-8000-000000000006',
+  'Astrid Bouclé Headboard Bed',
+  'astrid-boucle-headboard-bed',
+  'Sculpted wingback headboard tailored in heavyweight bouclé wool, providing acoustic dampening and ergonomic reading support.',
+  1890.00,
+  2100.00,
+  5,
+  ARRAY['https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1000&q=80'],
+  '22222222-2222-2222-2222-222222222222',
+  FALSE,
+  TRUE
+),
+-- Dining Room Pieces
+(
+  'e3333333-0001-4000-8000-000000000001',
+  'Haven Round Oak Dining Table',
+  'haven-round-oak-dining-table',
+  'Centrally placed fluted conical pedestal supporting a 54-inch solid French white oak bullnose tabletop.',
+  1450.00,
+  1650.00,
+  9,
+  ARRAY['https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=1000&q=80'],
+  '33333333-3333-3333-3333-333333333333',
+  TRUE,
+  TRUE
+),
+(
+  'e3333333-0002-4000-8000-000000000002',
+  'Hans Sculpted Dining Chair (Pair)',
+  'hans-sculpted-dining-chair-pair',
+  'Pair of ergonomic curved back dining chairs crafted from steam-bent ash with natural hand-woven paper cord seats.',
+  680.00,
+  780.00,
+  24,
+  ARRAY['https://images.unsplash.com/photo-1503602642458-232111445657?w=1000&q=80'],
+  '33333333-3333-3333-3333-333333333333',
+  FALSE,
+  TRUE
+),
+(
+  'e3333333-0003-4000-8000-000000000003',
+  'Celine Cane Weave Dining Chair',
+  'celine-cane-weave-dining-chair',
+  'Modern French bistro dining chair with natural rattan cane inserts and an ebonized solid beechwood perimeter.',
+  340.00,
+  NULL,
+  18,
+  ARRAY['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1000&q=80'],
+  '33333333-3333-3333-3333-333333333333',
+  FALSE,
+  TRUE
+),
+(
+  'e3333333-0004-4000-8000-000000000004',
+  'Brisa Solid Walnut Sideboard Buffet',
+  'brisa-solid-walnut-sideboard-buffet',
+  'Four-door dining buffet featuring brass hardware accents, adjustable glassware shelving, and integrated silverware dividers.',
+  1850.00,
+  2100.00,
+  5,
+  ARRAY['https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=1000&q=80'],
+  '33333333-3333-3333-3333-333333333333',
+  TRUE,
+  TRUE
+),
+(
+  'e3333333-0005-4000-8000-000000000005',
+  'Vester Oval Travertine Dining Table',
+  'vester-oval-travertine-dining-table',
+  'Grand 84-inch oval dining table with double fluted limestone columns and a polished matte chamfered edge.',
+  2890.00,
+  3200.00,
+  3,
+  ARRAY['https://images.unsplash.com/photo-1617806118233-18e1de247200?w=1000&q=80'],
+  '33333333-3333-3333-3333-333333333333',
+  TRUE,
+  TRUE
+),
+(
+  'e3333333-0006-4000-8000-000000000006',
+  'Eos Minimalist Credenza Buffet',
+  'eos-minimalist-credenza-buffet',
+  'Low profile dining credenza featuring tambour sliding slatted doors and blackened bronze tubular steel supports.',
+  1390.00,
+  1550.00,
+  8,
+  ARRAY['https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=1000&q=80'],
+  '33333333-3333-3333-3333-333333333333',
+  FALSE,
+  TRUE
+),
+-- Home Office Pieces
+(
+  'e4444444-0001-4000-8000-000000000001',
+  'Artisan Solid Oak Writing Desk',
+  'artisan-solid-oak-writing-desk',
+  'Architectural executive desk with integrated cable trough, hidden power strip compartment, and precision dovetailed pencil drawer.',
+  1150.00,
+  1300.00,
+  9,
+  ARRAY['https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=1000&q=80'],
+  '44444444-4444-4444-4444-444444444444',
+  TRUE,
+  TRUE
+),
+(
+  'e4444444-0002-4000-8000-000000000002',
+  'Verona Ergonomic Leather Task Chair',
+  'verona-ergonomic-leather-task-chair',
+  'Executive task chair with pneumatic height adjustment, synchronous tilt mechanism, and supple Italian top-grain leather padding.',
+  890.00,
+  980.00,
+  14,
+  ARRAY['https://images.unsplash.com/photo-1580481077197-04877be1c70e?w=1000&q=80'],
+  '44444444-4444-4444-4444-444444444444',
+  TRUE,
+  TRUE
+),
+(
+  'e4444444-0003-4000-8000-000000000003',
+  'Studio Minimalist Modular Shelving',
+  'studio-minimalist-modular-shelving',
+  'Wall-anchored architectural modular shelving system with solid walnut tiers and extruded powder-coated aluminum verticals.',
+  780.00,
+  890.00,
+  12,
+  ARRAY['https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=1000&q=80'],
+  '44444444-4444-4444-4444-444444444444',
+  FALSE,
+  TRUE
+),
+(
+  'e4444444-0004-4000-8000-000000000004',
+  'Atelier Floating Drawer Executive Desk',
+  'atelier-floating-drawer-executive-desk',
+  'Spacious 60-inch workspace crafted from solid American walnut with dual suspended drawer boxes and chamfered edges.',
+  1420.00,
+  1600.00,
+  7,
+  ARRAY['https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=1000&q=80'],
+  '44444444-4444-4444-4444-444444444444',
+  TRUE,
+  TRUE
+),
+(
+  'e4444444-0005-4000-8000-000000000005',
+  'Kanto Swivel Wool Task Chair',
+  'kanto-swivel-wool-task-chair',
+  'Mid-century inspired desk chair upholstered in durable felted Danish wool with a five-star cast brass wheel base.',
+  640.00,
+  NULL,
+  15,
+  ARRAY['https://images.unsplash.com/photo-1503602642458-232111445657?w=1000&q=80'],
+  '44444444-4444-4444-4444-444444444444',
+  FALSE,
+  TRUE
+),
+(
+  'e4444444-0006-4000-8000-000000000006',
+  'Linear Brass & Walnut Wall Bookshelf',
+  'linear-brass-and-walnut-wall-bookshelf',
+  'Open-back tiered display bookcase with brushed brass stanchions and 1.5-inch solid walnut display planks.',
+  890.00,
+  990.00,
+  11,
+  ARRAY['https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=1000&q=80'],
+  '44444444-4444-4444-4444-444444444444',
+  FALSE,
+  TRUE
+),
+-- Storage Pieces
+(
+  'e5555555-0001-4000-8000-000000000001',
+  'Milo Architectural Oak Sideboard',
+  'milo-architectural-oak-sideboard',
+  'Credenza cabinet featuring vertical relief fluting on four push-to-open doors, housing soft-close interior drawers.',
+  1580.00,
+  1750.00,
+  7,
+  ARRAY['https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=1000&q=80'],
+  '55555555-5555-5555-5555-555555555555',
+  TRUE,
+  TRUE
+),
+(
+  'e5555555-0002-4000-8000-000000000002',
+  'Tenon Solid Hardwood Bookcase',
+  'tenon-solid-hardwood-bookcase',
+  'Five-tier library bookcase assembled with exposed traditional mortise-and-tenon Japanese joinery details.',
+  1240.00,
+  1390.00,
+  8,
+  ARRAY['https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=1000&q=80'],
+  '55555555-5555-5555-5555-555555555555',
+  FALSE,
+  TRUE
+),
+(
+  'e5555555-0003-4000-8000-000000000003',
+  'Silas Fluted Marble Media Console',
+  'silas-fluted-marble-media-console',
+  'Low profile entertainment console crowned with a solid honed Nero Marquina marble slab over fluted dark walnut cabinetry.',
+  1890.00,
+  2150.00,
+  6,
+  ARRAY['https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=1000&q=80'],
+  '55555555-5555-5555-5555-555555555555',
+  TRUE,
+  TRUE
+),
+(
+  'e5555555-0004-4000-8000-000000000004',
+  'Kanso Minimalist 2-Door Cabinet',
+  'kanso-minimalist-2-door-cabinet',
+  'Compact storage console with woven papercord door panels, solid white oak structure, and adjustable internal shelf heights.',
+  760.00,
+  840.00,
+  13,
+  ARRAY['https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=1000&q=80'],
+  '55555555-5555-5555-5555-555555555555',
+  FALSE,
+  TRUE
+),
+(
+  'e5555555-0005-4000-8000-000000000005',
+  'Arcos Glass Display Cabinet',
+  'arcos-glass-display-cabinet',
+  'Slender archival display curio featuring tempered reeded glass doors, integrated warm LED interior illumination, and bronze pulls.',
+  1450.00,
+  1650.00,
+  5,
+  ARRAY['https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=1000&q=80'],
+  '55555555-5555-5555-5555-555555555555',
+  TRUE,
+  TRUE
+),
+(
+  'e5555555-0006-4000-8000-000000000006',
+  'Forma Low Slung Entryway Console',
+  'forma-low-slung-entryway-console',
+  'Architectural entryway credenza with curved cylindrical pillared legs and a dual-compartment felt-lined catchall drawer.',
+  890.00,
+  NULL,
+  12,
+  ARRAY['https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=1000&q=80'],
+  '55555555-5555-5555-5555-555555555555',
+  FALSE,
+  TRUE
+)
+ON CONFLICT (slug) DO UPDATE SET
+  title = EXCLUDED.title,
+  description = EXCLUDED.description,
+  price = EXCLUDED.price,
+  compare_at_price = EXCLUDED.compare_at_price,
+  stock = EXCLUDED.stock,
+  images = EXCLUDED.images,
+  category_id = EXCLUDED.category_id,
+  is_featured = EXCLUDED.is_featured,
+  is_published = EXCLUDED.is_published,
+  updated_at = NOW();
+
+-- ==============================================================================
+-- SECTION 12: CATALOG INR PRICING & IMAGE CATALOG REFINEMENT MIGRATION
+-- ==============================================================================
+-- Purpose:
+-- 1. Add optional image_url and gallery_images columns to products table.
+-- 2. Convert all product catalog prices and compare_at_prices from USD to INR using conversion rate 1 USD = 83 INR.
+-- 3. Sync image_url and gallery_images with verified unique luxury furniture images.
+-- ==============================================================================
+
+-- 12.1 Add Schema Columns
+ALTER TABLE public.products
+ADD COLUMN IF NOT EXISTS image_url TEXT;
+
+ALTER TABLE public.products
+ADD COLUMN IF NOT EXISTS gallery_images TEXT[];
+
+-- 12.2 Convert USD Prices to INR (1 USD = 83 INR)
+UPDATE public.products
+SET
+  price = ROUND(price * 83),
+  compare_at_price = CASE 
+    WHEN compare_at_price IS NOT NULL THEN ROUND(compare_at_price * 83) 
+    ELSE NULL 
+  END,
+  updated_at = NOW()
+WHERE price < 10000; -- Prevents re-multiplying if already in INR
+
+-- 12.3 Populate image_url and gallery_images from images array
+UPDATE public.products
+SET
+  image_url = images[1],
+  gallery_images = images
+WHERE (image_url IS NULL OR array_length(gallery_images, 1) IS NULL)
+  AND array_length(images, 1) > 0;
+
+-- ==============================================================================
+-- SECTION 13: REALISTIC INDIAN FURNITURE PRICING RE-MIGRATION
+-- Target Engine: PostgreSQL 15+ (Supabase SQL Editor Ready)
+-- Purpose:
+-- Replace raw USD*83 pricing with realistic market pricing tailored for India
+-- adhering to guidelines:
+-- Small Decor/Accessories: ₹499 - ₹2,499
+-- Bookshelves: ₹4,999 - ₹14,999
+-- Coffee Tables: ₹3,999 - ₹12,999
+-- TV Units/Consoles: ₹6,999 - ₹24,999
+-- Office Chairs: ₹3,999 - ₹18,999
+-- Office Desks: ₹6,999 - ₹29,999
+-- Sofas: ₹14,999 - ₹79,999
+-- Storage Cabinets: ₹4,999 - ₹24,999
+-- Sideboards: ₹8,999 - ₹34,999
+-- Discounts: Recalculated between 10% and 15%.
+-- ==============================================================================
+
+UPDATE public.products SET price = 34999, compare_at_price = 39999, updated_at = NOW() WHERE slug = 'nordic-boucle-curved-sofa';
+UPDATE public.products SET price = 42999, compare_at_price = 49999, updated_at = NOW() WHERE slug = 'koto-sculptural-3-seater-sofa';
+UPDATE public.products SET price = 26999, compare_at_price = 29999, updated_at = NOW() WHERE slug = 'oslo-linen-daybed-lounge';
+UPDATE public.products SET price = 12499, compare_at_price = NULL, updated_at = NOW() WHERE slug = 'koben-walnut-lounge-chair';
+UPDATE public.products SET price = 14999, compare_at_price = 16999, updated_at = NOW() WHERE slug = 'bauhaus-saddle-leather-armchair';
+UPDATE public.products SET price = 7999, compare_at_price = 8999, updated_at = NOW() WHERE slug = 'koben-low-walnut-coffee-table';
+UPDATE public.products SET price = 9499, compare_at_price = NULL, updated_at = NOW() WHERE slug = 'kyoto-fluted-oak-coffee-table';
+UPDATE public.products SET price = 2499, compare_at_price = NULL, updated_at = NOW() WHERE slug = 'neva-travertine-accent-side-table';
+UPDATE public.products SET price = 26999, compare_at_price = 29999, updated_at = NOW() WHERE slug = 'sora-solid-oak-platform-bed';
+UPDATE public.products SET price = 24499, compare_at_price = NULL, updated_at = NOW() WHERE slug = 'ren-minimalist-upholstered-bed';
+UPDATE public.products SET price = 29999, compare_at_price = 34999, updated_at = NOW() WHERE slug = 'astrid-boucle-headboard-bed';
+UPDATE public.products SET price = 21999, compare_at_price = 24999, updated_at = NOW() WHERE slug = 'aalto-6-drawer-walnut-dresser';
+UPDATE public.products SET price = 18499, compare_at_price = 21499, updated_at = NOW() WHERE slug = 'hans-tallboy-5-drawer-dresser';
+UPDATE public.products SET price = 2299, compare_at_price = 2599, updated_at = NOW() WHERE slug = 'maru-solid-ash-nightstand';
+UPDATE public.products SET price = 1899, compare_at_price = 2199, updated_at = NOW() WHERE slug = 'tsubaki-low-floating-nightstand';
+UPDATE public.products SET price = 29999, compare_at_price = NULL, updated_at = NOW() WHERE slug = 'arden-travertine-dining-table';
+UPDATE public.products SET price = 22999, compare_at_price = 25999, updated_at = NOW() WHERE slug = 'haven-round-oak-dining-table';
+UPDATE public.products SET price = 34999, compare_at_price = 39999, updated_at = NOW() WHERE slug = 'vester-oval-travertine-dining-table';
+UPDATE public.products SET price = 24999, compare_at_price = 28999, updated_at = NOW() WHERE slug = 'brisa-solid-walnut-sideboard-buffet';
+UPDATE public.products SET price = 19999, compare_at_price = 22999, updated_at = NOW() WHERE slug = 'eos-minimalist-credenza-buffet';
+UPDATE public.products SET price = 7499, compare_at_price = 8499, updated_at = NOW() WHERE slug = 'hans-sculpted-dining-chair-pair';
+UPDATE public.products SET price = 4499, compare_at_price = NULL, updated_at = NOW() WHERE slug = 'celine-cane-weave-dining-chair';
+UPDATE public.products SET price = 16999, compare_at_price = 19499, updated_at = NOW() WHERE slug = 'artisan-solid-oak-writing-desk';
+UPDATE public.products SET price = 21999, compare_at_price = 24999, updated_at = NOW() WHERE slug = 'atelier-floating-drawer-executive-desk';
+UPDATE public.products SET price = 8999, compare_at_price = NULL, updated_at = NOW() WHERE slug = 'kanto-swivel-wool-task-chair';
+UPDATE public.products SET price = 12999, compare_at_price = 14999, updated_at = NOW() WHERE slug = 'verona-ergonomic-leather-task-chair';
+UPDATE public.products SET price = 9999, compare_at_price = 11499, updated_at = NOW() WHERE slug = 'linear-brass-and-walnut-wall-bookshelf';
+UPDATE public.products SET price = 8499, compare_at_price = 9499, updated_at = NOW() WHERE slug = 'studio-minimalist-modular-shelving';
+UPDATE public.products SET price = 22999, compare_at_price = 25999, updated_at = NOW() WHERE slug = 'milo-architectural-oak-sideboard';
+UPDATE public.products SET price = 18999, compare_at_price = 21999, updated_at = NOW() WHERE slug = 'silas-fluted-marble-media-console';
+UPDATE public.products SET price = 11999, compare_at_price = NULL, updated_at = NOW() WHERE slug = 'forma-low-slung-entryway-console';
+UPDATE public.products SET price = 9999, compare_at_price = 11299, updated_at = NOW() WHERE slug = 'kanso-minimalist-2-door-cabinet';
+UPDATE public.products SET price = 17999, compare_at_price = 19999, updated_at = NOW() WHERE slug = 'arcos-glass-display-cabinet';
+UPDATE public.products SET price = 13499, compare_at_price = 14999, updated_at = NOW() WHERE slug = 'tenon-solid-hardwood-bookcase';
+

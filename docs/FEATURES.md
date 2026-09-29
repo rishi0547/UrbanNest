@@ -67,34 +67,56 @@ Comprehensive functional breakdown, user stories, acceptance criteria, and imple
 ---
 
 ### Feature 5: Checkout & Order Creation (`features/orders`)
-- **User Story**: As a customer, I want a secure, transparent checkout process where I enter shipping details, review costs, and complete payment.
+- **User Story**: As a customer, I want a secure, transparent checkout process where I enter shipping details, review costs, and complete my order with immediate confirmation.
 - **Key Capabilities**:
-  - Multi-step checkout form:
-    1. Shipping Address & Contact Info (validated with Zod).
-    2. Shipping Method Selection (Standard, White-Glove In-Home Assembly).
-    3. Payment Details (Stripe Payment Element / secure gateway integration).
-  - Server Action handling atomic order placement:
-    - Verifies real-time item prices from `products` table (never trusts client price).
-    - Checks stock availability.
-    - Creates `orders` and `order_items` records in a database transaction.
-    - Clears customer cart upon successful payment.
-  - Dedicated `/orders/[orderNumber]/confirmation` receipt page.
+  - **7-Field Shipping Form** (React Hook Form + Zod validation):
+    1. Full Name
+    2. Phone Number (validated regex pattern)
+    3. Address Line 1 (street address)
+    4. Address Line 2 (suite/apartment/gate code, optional)
+    5. City
+    6. State
+    7. Postal Code
+  - **Order Summary Component**:
+    - Product List with high-res thumbnails, titles, unit prices, and quantities.
+    - Financial totals: Subtotal, White-Glove Shipping ($49 or Free over $500), Estimated Tax (8%), and Total Due.
+  - **Atomic Server Action (`createOrderAction`)**:
+    - Verifies real-time item prices and active publication status from PostgreSQL `products` table (never trusts client price).
+    - Validates sufficient stock quantity.
+    - Inserts order record into `orders` table (`subtotal`, `shipping`, `tax`, `total`, `shipping_address`, `status = 'pending'`).
+    - Inserts line items into `order_items` table capturing immutable historical purchase snapshot (`product_id`, `product_name`, `product_price`, `quantity`, `line_total`).
+    - Atomically decrements physical inventory in `products` table.
+    - Revalidates Next.js Data Cache routes (`/orders`, `/admin/orders`, `/products`).
+    - Clears local Zustand cart store (`clearCart()`).
+  - **Luxury Order Success Page (`/order-success`)**:
+    - Playfair Display luxury thank you confirmation.
+    - Order Reference ID display.
+    - Action buttons: "View Order Details" / "View All Orders" and "Continue Shopping".
 - **Acceptance Criteria**:
-  - Unit prices are recalculated on the server to prevent client-side price tampering.
-  - Transaction rolls back if any product in the cart is oversold before completion.
-  - Order number is generated in a clean format (e.g. `UN-2026-XXXX`).
+  - Unit prices are calculated strictly on the server to prevent client-side price tampering.
+  - Cart is completely wiped upon successful submission.
+  - Order numbers are uniquely generated in clean enterprise format (e.g. `UN-2026-XXXXXX`).
 
 ---
 
-### Feature 6: Customer Order Dashboard (`features/orders`)
-- **User Story**: As a registered customer, I want to review my past orders, download invoices, and see shipment tracking status.
+### Feature 6: Customer Order History & Detailed Receipts (`features/orders`)
+- **User Story**: As a registered customer, I want to review my past orders, track fulfillment status with clear visual cues, and inspect complete order details.
 - **Key Capabilities**:
-  - `/profile/orders` list displaying order number, date, total, and status badge.
-  - Status pipeline: `Pending` -> `Processing` -> `Shipped` -> `Delivered`.
-  - Itemized order breakdown showing thumbnail, purchased title, quantity, and historical price.
+  - Customer order list (`/orders`) displaying Order ID, Date, Status, Total Amount, and Order Items summary.
+  - **Exact Status Badge Color System**:
+    - `Pending`: Amber (`bg-amber-500/10 text-amber-700 border-amber-500/30`)
+    - `Processing`: Blue (`bg-blue-500/10 text-blue-700 border-blue-500/30`)
+    - `Shipped`: Purple (`bg-purple-500/10 text-purple-700 border-purple-500/30`)
+    - `Delivered`: Emerald (`bg-emerald-500/10 text-emerald-700 border-emerald-500/30`)
+    - `Cancelled`: Red (`bg-rose-500/10 text-rose-700 border-rose-500/30`)
+  - **Dedicated Order Details View (`/orders/[id]`)**:
+    - **Shipping Details**: Full recipient name, phone, formatted address lines, city, state, postal code.
+    - **Ordered Products**: Thumbnail images, product title links, item prices, quantities, and line totals.
+    - **Order Summary**: Subtotal, shipping fee, tax breakdown, and total invoiced.
+  - TanStack Query SSR hydration via `<HydrationBoundary state={dehydrate(queryClient)}>`.
 - **Acceptance Criteria**:
   - Protected by RLS: customers can only view their own orders (`auth.uid() = user_id`).
-  - Visual status timeline indicates current shipment stage.
+  - Order card links directly to `/orders/[id]` for in-depth inspection.
 
 ---
 
@@ -153,4 +175,4 @@ Comprehensive functional breakdown, user stories, acceptance criteria, and imple
 | **Customer Order History** | Order history, itemized receipts, delivery status badges | **DONE** | Implemented in `/orders`, `UserOrdersView`, TanStack Query |
 | **Admin Order Management**| Order fulfillment pipeline, status updater, live filter tabs | **DONE** | Implemented in `/admin/orders`, `AdminOrdersTable`, `updateOrderStatusAction` |
 | **Luxury Storefront Redesign** | Natura-inspired warm luxury homepage, 10 sections, Framer Motion | **DONE** | Implemented in `app/page.tsx`, `components/home/`, `StorefrontNav` |
-
+| **Catalog Cleanup & INR Currency** | 1 USD = ₹83 conversion, zero '$' remaining, 34 unique hero images, ProductImageFallback | **DONE** | Implemented in `utils/currency.ts`, `ProductImageFallback.tsx`, Supabase live migration, Section 12 SQL |

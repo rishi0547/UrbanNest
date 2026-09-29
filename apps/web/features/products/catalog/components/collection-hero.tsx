@@ -48,7 +48,7 @@ export function CollectionHero() {
                 <ArrowDown className="size-4 animate-bounce" />
               </Button>
               <span className="text-xs text-[#6B7280] font-light hidden sm:inline">
-                Over 40 studio signatures
+                Over 30 studio signatures
               </span>
             </div>
           </div>

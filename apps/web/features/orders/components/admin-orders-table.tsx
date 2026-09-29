@@ -12,6 +12,7 @@ import type { OrderStatus } from "../types";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatINR } from "@/utils/currency";
 
 export function AdminOrdersTable() {
   const queryClient = useQueryClient();
@@ -42,12 +43,13 @@ export function AdminOrdersTable() {
     const query = searchQuery.toLowerCase().trim();
     const matchesSearch =
       !query ||
-      order.order_number.toLowerCase().includes(query) ||
-      order.profile?.email.toLowerCase().includes(query) ||
-      order.shipping_address.full_name.toLowerCase().includes(query) ||
-      order.shipping_address.city.toLowerCase().includes(query);
+      order.order_number?.toLowerCase().includes(query) ||
+      order.id.toLowerCase().includes(query) ||
+      order.profile?.email?.toLowerCase().includes(query) ||
+      order.shipping_address?.full_name?.toLowerCase().includes(query) ||
+      order.shipping_address?.city?.toLowerCase().includes(query);
 
-    return matchesStatus && matchesSearch;
+    return matchesStatus && Boolean(matchesSearch);
   });
 
   const statuses: { label: string; value: string }[] = [
@@ -116,43 +118,43 @@ export function AdminOrdersTable() {
             <table className="w-full text-left text-xs">
               <thead className="bg-muted/50 font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                 <tr>
-                  <th className="py-3.5 px-4">Order ID &amp; Date</th>
+                  <th className="py-3.5 px-4">Order ID</th>
                   <th className="py-3.5 px-4">Customer</th>
-                  <th className="py-3.5 px-4">Destination</th>
-                  <th className="py-3.5 px-4">Items</th>
-                  <th className="py-3.5 px-4">Total</th>
-                  <th className="py-3.5 px-4">Current Status</th>
-                  <th className="py-3.5 px-4 text-right">Update Lifecycle</th>
+                  <th className="py-3.5 px-4">Date</th>
+                  <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4">Amount</th>
+                  <th className="py-3.5 px-4 text-right">Update Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
                 {filteredOrders.map((order) => {
-                  const formattedDate = new Date(order.created_at).toLocaleDateString("en-US", {
+                  const formattedDate = new Date(order.created_at).toLocaleDateString("en-IN", {
                     month: "short",
                     day: "numeric",
                     year: "numeric",
                   });
 
                   const isUpdatingThis = updatingOrderId === order.id && isPending;
-                  const customerEmail = order.profile?.email || "Guest Shopper";
-                  const customerName = order.shipping_address.full_name;
+                  const customerEmail = order.profile?.email || "Customer";
+                  const customerName = order.shipping_address?.full_name || "Valued Client";
+                  const orderAmount = Number(order.total ?? order.total_amount ?? 0);
 
                   return (
                     <tr
                       key={order.id}
                       className="hover:bg-muted/30 transition-colors"
                     >
-                      {/* Order Number & Placement Date */}
+                      {/* Order ID */}
                       <td className="py-3.5 px-4">
                         <div className="font-mono font-bold text-foreground">
-                          {order.order_number}
+                          {order.order_number || order.id.slice(0, 8)}
                         </div>
-                        <div className="text-[11px] text-muted-foreground mt-0.5">
-                          {formattedDate}
+                        <div className="text-[10px] text-muted-foreground font-mono truncate max-w-[120px]">
+                          {order.id}
                         </div>
                       </td>
 
-                      {/* Customer Info */}
+                      {/* Customer */}
                       <td className="py-3.5 px-4">
                         <div className="font-medium text-foreground">{customerName}</div>
                         <div className="text-[11px] text-muted-foreground truncate max-w-xs">
@@ -160,31 +162,19 @@ export function AdminOrdersTable() {
                         </div>
                       </td>
 
-                      {/* Shipping Destination */}
-                      <td className="py-3.5 px-4">
-                        <div className="text-foreground">
-                          {order.shipping_address.city}, {order.shipping_address.state}
-                        </div>
-                        <div className="text-[11px] text-muted-foreground font-mono">
-                          {order.shipping_address.pincode}
-                        </div>
+                      {/* Date */}
+                      <td className="py-3.5 px-4 text-muted-foreground whitespace-nowrap">
+                        {formattedDate}
                       </td>
 
-                      {/* Line Items Count & Preview */}
-                      <td className="py-3.5 px-4">
-                        <Badge variant="outline" className="font-mono text-[10px]">
-                          {order.order_items?.length || 0} items
-                        </Badge>
-                      </td>
-
-                      {/* Financial Total */}
-                      <td className="py-3.5 px-4 font-mono font-bold text-foreground text-sm">
-                        ${Number(order.total_amount).toFixed(2)}
-                      </td>
-
-                      {/* Current Status Badge */}
+                      {/* Status */}
                       <td className="py-3.5 px-4">
                         <OrderStatusBadge status={order.status} />
+                      </td>
+
+                      {/* Amount */}
+                      <td className="py-3.5 px-4 font-mono font-bold text-foreground text-sm whitespace-nowrap">
+                        {formatINR(orderAmount)}
                       </td>
 
                       {/* Action: Status Transition Dropdown */}

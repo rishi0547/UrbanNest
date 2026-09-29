@@ -6,7 +6,6 @@ import { useProducts, useCategories } from "../queries";
 import { ProductCard } from "./product-card";
 import { CompactFilterBar } from "./compact-filter-bar";
 import { Button } from "@/components/ui/button";
-import { CURATED_CATALOG } from "../catalog-data";
 import type { CatalogFilterOptions, CatalogProduct } from "../types";
 
 interface ProductGridProps {
@@ -51,17 +50,9 @@ export function ProductGrid({
     }
   };
 
-  // Combine database products with curated studio catalog for comprehensive luxury selection
+  // Filter only real products fetched from the database
   const filteredProducts = useMemo(() => {
-    // Start with curated catalog as baseline and merge DB products
-    const dbItems = dbProducts || [];
-    const dbSlugs = new Set(dbItems.map((p) => p.slug));
-
-    // Combine unique items
-    const merged: CatalogProduct[] = [
-      ...dbItems,
-      ...CURATED_CATALOG.filter((c) => !dbSlugs.has(c.slug)),
-    ];
+    const merged: CatalogProduct[] = dbProducts || [];
 
     let result = merged.filter((item) => {
       // 1. Category Filter
@@ -84,11 +75,11 @@ export function ProductGrid({
         return false;
       }
 
-      // 4. Price Range
+      // 4. Price Range (in INR)
       const price = Number(item.price);
-      if (priceRange === "under-1000" && price >= 1000) return false;
-      if (priceRange === "1000-2000" && (price < 1000 || price > 2000)) return false;
-      if (priceRange === "above-2000" && price <= 2000) return false;
+      if ((priceRange === "under-10k" || priceRange === "under-75k" || priceRange === "under-1000") && price >= 10000) return false;
+      if ((priceRange === "10k-25k" || priceRange === "75k-150k" || priceRange === "1000-2000") && (price < 10000 || price > 25000)) return false;
+      if ((priceRange === "above-25k" || priceRange === "above-150k" || priceRange === "above-2000") && price <= 25000) return false;
 
       // 5. Material Filter
       if (materialFilter !== "all") {

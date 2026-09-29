@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function CheckoutPage() {
-  const { user, profile } = await requireAuth();
+  const { user, profile } = await requireAuth("/checkout");
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

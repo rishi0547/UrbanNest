@@ -5,6 +5,7 @@ import { requireAuth } from "@/features/auth/roles";
 import { getQueryClient } from "@/lib/query-client";
 import { orderQueryKeys } from "@/features/orders/query-keys";
 import { getUserOrders } from "@/features/orders/api";
+import { createClient } from "@/lib/supabase/server";
 import { StorefrontNav } from "@/components/storefront-nav";
 import { UserOrdersView } from "@/features/orders/components/user-orders-view";
 
@@ -17,12 +18,13 @@ export const dynamic = "force-dynamic";
 
 export default async function OrdersPage() {
   await requireAuth();
+  const supabase = await createClient();
   const queryClient = getQueryClient();
 
   // Prefetch customer orders for instant initial paint
   await queryClient.prefetchQuery({
     queryKey: orderQueryKeys.user(),
-    queryFn: () => getUserOrders(),
+    queryFn: () => getUserOrders(supabase),
   });
 
   return (

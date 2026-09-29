@@ -19,10 +19,10 @@ const categories = [
   { name: "Chairs", slug: "living-room", icon: Armchair },
   { name: "Tables", slug: "dining-room", icon: TableIcon },
   { name: "Beds", slug: "bedroom", icon: Bed },
-  { name: "Storage", slug: "home-office", icon: Archive },
-  { name: "Lighting", slug: "home-office", icon: Lamp },
-  { name: "Decor", slug: "living-room", icon: Flower2 },
-  { name: "Outdoor", slug: "outdoor", icon: TreePine },
+  { name: "Storage", slug: "storage", icon: Archive },
+  { name: "Desks", slug: "home-office", icon: Lamp },
+  { name: "Consoles", slug: "storage", icon: Flower2 },
+  { name: "All Pieces", slug: "all", icon: TreePine },
 ];
 
 export function CategoriesSection() {

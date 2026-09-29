@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/features/cart";
+import { formatINR } from "@/utils/currency";
 import type { CatalogProduct } from "../types";
 
 interface ProductInfoPanelProps {
@@ -173,20 +174,20 @@ export function ProductInfoPanel({
       {/* 3. Pricing & Savings Area */}
       <div className="flex items-baseline flex-wrap gap-3 pb-4 border-b border-[#E5E2DC]">
         <span className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#1A1A1A]">
-          ${currentPrice.toFixed(2)}
+          {formatINR(currentPrice)}
         </span>
 
         {comparePrice && comparePrice > currentPrice && (
           <span className="text-xl text-[#6B7280] line-through font-light">
-            ${comparePrice.toFixed(2)}
+            {formatINR(comparePrice)}
           </span>
         )}
 
-        {savings && (
+        {savings ? (
           <Badge className="bg-[#5D6B4D]/10 text-[#5D6B4D] border border-[#5D6B4D]/25 font-semibold text-xs px-2.5 py-1">
-            Save ${savings.toFixed(0)} ({savingsPercent}%)
+            Save {formatINR(savings)} ({savingsPercent}%)
           </Badge>
-        )}
+        ) : null}
 
         {/* Availability Badge */}
         <div className="ml-auto">
@@ -358,7 +359,7 @@ export function ProductInfoPanel({
             className="flex-1 h-12 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white font-semibold text-sm sm:text-base gap-2 shadow-xs transition-colors cursor-pointer"
           >
             <ShoppingBag className="size-4" />
-            {isOutOfStock ? "Sold Out" : `Add to Cart • $${(currentPrice * quantity).toFixed(2)}`}
+            {isOutOfStock ? "Sold Out" : `Add to Cart • ${formatINR(currentPrice * quantity)}`}
           </Button>
 
           {/* Wishlist Button */}

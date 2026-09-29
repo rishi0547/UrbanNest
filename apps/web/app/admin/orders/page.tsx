@@ -6,6 +6,7 @@ import { requireAdmin } from "@/features/auth/roles";
 import { getQueryClient } from "@/lib/query-client";
 import { orderQueryKeys } from "@/features/orders/query-keys";
 import { getAdminOrders } from "@/features/orders/api";
+import { createClient } from "@/lib/supabase/server";
 import { AdminOrdersTable } from "@/features/orders/components/admin-orders-table";
 
 export const metadata: Metadata = {
@@ -17,12 +18,13 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminOrdersPage() {
   await requireAdmin();
+  const supabase = await createClient();
   const queryClient = getQueryClient();
 
   // Prefetch all orders for immediate admin review
   await queryClient.prefetchQuery({
     queryKey: orderQueryKeys.admin(),
-    queryFn: () => getAdminOrders(),
+    queryFn: () => getAdminOrders(supabase),
   });
 
   return (

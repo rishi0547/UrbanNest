@@ -120,9 +120,9 @@ export function CompactFilterBar({
             className="h-9 rounded-full border border-[#E5E2DC] bg-white px-3 text-xs font-medium text-[#1A1A1A] outline-none hover:border-[#5D6B4D]/50 transition-colors cursor-pointer shrink-0"
           >
             <option value="all">Price: All</option>
-            <option value="under-1000">Under $1,000</option>
-            <option value="1000-2000">$1,000 – $2,000</option>
-            <option value="above-2000">$2,000+</option>
+            <option value="under-10k">Under ₹10,000</option>
+            <option value="10k-25k">₹10,000 – ₹25,000</option>
+            <option value="above-25k">₹25,000+</option>
           </select>
 
           {/* Material Filter */}
@@ -180,7 +180,7 @@ export function CompactFilterBar({
           )}
         </div>
         <div className="hidden sm:block text-[11px] font-light">
-          Complimentary white-glove setup on orders over $1,500
+          Complimentary white-glove setup on orders over ₹1,00,000
         </div>
       </div>
     </div>

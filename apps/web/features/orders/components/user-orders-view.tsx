@@ -15,6 +15,8 @@ import { useUserOrders } from "../queries";
 import { OrderStatusBadge } from "./order-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { formatINR } from "@/utils/currency";
+import { SafeProductImage } from "@/components/ProductImageFallback";
 
 export function UserOrdersView() {
   const searchParams = useSearchParams();
@@ -83,11 +85,22 @@ export function UserOrdersView() {
         /* Orders List */
         <div className="space-y-6">
           {orderList.map((order) => {
-            const formattedDate = new Date(order.created_at).toLocaleDateString("en-US", {
+            const formattedDate = new Date(order.created_at).toLocaleDateString("en-IN", {
               year: "numeric",
               month: "short",
               day: "numeric",
             });
+
+            const total = Number(order.total ?? order.total_amount ?? 0);
+            const addressText = [
+              order.shipping_address.address_line1 || order.shipping_address.address,
+              order.shipping_address.address_line2,
+              order.shipping_address.city,
+              order.shipping_address.state,
+              order.shipping_address.postal_code || order.shipping_address.pincode,
+            ]
+              .filter(Boolean)
+              .join(", ");
 
             return (
               <Card
@@ -98,9 +111,12 @@ export function UserOrdersView() {
                 <CardHeader className="bg-muted/30 border-b border-border/60 py-4 px-5">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="font-mono text-base font-bold text-foreground">
-                        {order.order_number}
-                      </span>
+                      <Link
+                        href={`/orders/${order.id}`}
+                        className="font-mono text-base font-bold text-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+                      >
+                        <span>{order.order_number || order.id.slice(0, 8)}</span>
+                      </Link>
                       <OrderStatusBadge status={order.status} />
                     </div>
 
@@ -111,7 +127,7 @@ export function UserOrdersView() {
                       </span>
                       <span>•</span>
                       <span className="font-bold text-foreground font-mono text-sm">
-                        ${Number(order.total_amount).toFixed(2)}
+                        {formatINR(total)}
                       </span>
                     </div>
                   </div>
@@ -120,19 +136,31 @@ export function UserOrdersView() {
                 {/* Order Body */}
                 <CardContent className="p-5 space-y-4">
                   {/* Delivery destination snippet */}
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <MapPin className="size-3.5 text-primary shrink-0" />
-                    <span>
-                      Delivering to: <strong className="text-foreground">{order.shipping_address.full_name}</strong>,{" "}
-                      {order.shipping_address.address}, {order.shipping_address.city}, {order.shipping_address.state}{" "}
-                      {order.shipping_address.pincode}
-                    </span>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2 truncate">
+                      <MapPin className="size-3.5 text-primary shrink-0" />
+                      <span className="truncate">
+                        Delivering to:{" "}
+                        <strong className="text-foreground">{order.shipping_address.full_name}</strong>
+                        {addressText && ` • ${addressText}`}
+                      </span>
+                    </div>
+
+                    <Link
+                      href={`/orders/${order.id}`}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline shrink-0 ml-4"
+                    >
+                      <span>View Details</span>
+                      <ArrowRight className="size-3.5" />
+                    </Link>
                   </div>
 
                   {/* Line Items */}
                   <div className="border-t border-border/50 pt-3 divide-y divide-border/40">
                     {order.order_items?.map((item) => {
                       const thumbnail = item.product?.images?.[0];
+                      const itemTitle = item.product_name || item.product?.title || "UrbanNest Item";
+                      const itemPrice = Number(item.product_price ?? item.price ?? 0);
 
                       return (
                         <div
@@ -141,17 +169,13 @@ export function UserOrdersView() {
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="relative size-12 rounded-lg overflow-hidden border border-border bg-muted/40 shrink-0">
-                              {thumbnail ? (
-                                <Image
-                                  src={thumbnail}
-                                  alt={item.product?.title || "Product"}
-                                  fill
-                                  sizes="48px"
-                                  className="object-cover"
-                                />
-                              ) : (
-                                <Package className="size-5 m-auto text-muted-foreground" />
-                              )}
+                              <SafeProductImage
+                                src={thumbnail}
+                                alt={itemTitle}
+                                fill
+                                sizes="48px"
+                                className="object-cover"
+                              />
                             </div>
                             <div className="min-w-0">
                               {item.product?.slug ? (
@@ -159,21 +183,21 @@ export function UserOrdersView() {
                                   href={`/products/${item.product.slug}`}
                                   className="font-medium text-xs text-foreground hover:text-primary transition-colors truncate block"
                                 >
-                                  {item.product.title}
+                                  {itemTitle}
                                 </Link>
                               ) : (
                                 <span className="font-medium text-xs text-foreground truncate block">
-                                  {item.product?.title || "Custom Piece"}
+                                  {itemTitle}
                                 </span>
                               )}
                               <span className="text-[11px] text-muted-foreground font-mono">
-                                Qty: {item.quantity} &times; ${Number(item.price).toFixed(2)}
+                                Qty: {item.quantity} &times; {formatINR(itemPrice)}
                               </span>
                             </div>
                           </div>
 
                           <div className="font-mono text-xs font-semibold text-foreground shrink-0">
-                            ${(Number(item.price) * item.quantity).toFixed(2)}
+                            {formatINR(Number(item.line_total ?? itemPrice * item.quantity))}
                           </div>
                         </div>
                       );

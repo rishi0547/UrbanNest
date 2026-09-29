@@ -31,6 +31,10 @@ export function CatalogShowcaseSection({
     }
   };
 
+  if (!products || products.length === 0) {
+    return null;
+  }
+
   return (
     <section className="w-full bg-[#F8F6F2] py-8 sm:py-10">
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">

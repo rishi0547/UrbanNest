@@ -394,6 +394,140 @@ A strategic playbook designed for senior full-stack and frontend engineering int
 >    - Animations must be subtle and calm. Flashy bounce or spinning animations destroy the feeling of prestige.
 >    - We built a reusable `MotionWrapper` utilizing `initial={{ opacity: 0, y: 24 }}`, `whileInView={{ opacity: 1, y: 0 }}`, and `viewport={{ once: true, margin: "-60px" }}` with an ease curve `[0.25, 0.46, 0.45, 0.94]`. This delivers smooth, fluid reveal transitions as the user scrolls, with zero layout shift."
 
+---
 
+## 3. Phase 1: Checkout & Order Creation Deep-Dive Interview Questions
 
+### Question 30: Why is the `orders` table architecturally separate from the `cart`?
+
+**Model Answer:**
+> "The fundamental difference between a Cart and an Order comes down to **transience vs. immutability**, **ownership lifecycle**, and **transactional integrity**:
+> 
+> 1. **State Mutability vs. Financial Invariance**:
+>    - A **Cart** is ephemeral, high-churn, volatile client state. Users constantly add, modify quantities, delete items, abandon sessions, or browse on multiple tabs.
+>    - An **Order** is a legally binding, legally auditable financial snapshot. Once placed, its subtotal, tax, shipping fee, destination address, and line items must NEVER mutate because an external catalog item changes price or is deleted.
+> 
+> 2. **Session Decoupling**:
+>    - Cart items can exist for anonymous guest users in `localStorage` without any database record or foreign keys.
+>    - Orders require an authenticated user identity (`user_id REFERENCES auth.users(id)`), payment state, and a fulfillment lifecycle (`pending -> processing -> shipped -> delivered -> cancelled`).
+> 
+> 3. **Performance & Database Bloat**:
+>    - If you attempt to reuse a single 'orders' table with a `is_cart = true` flag (an infamous anti-pattern), 80-90% of your orders table becomes dead cart abandonment junk, bloating B-Tree indexes, degrading query performance on actual purchases, and complicating Row Level Security policies. Keeping them distinct ensures orders tables remain clean, highly indexed, and ACID-compliant."
+
+---
+
+### Question 31: Why does `order_items` exist as an independent relational table?
+
+**Model Answer:**
+> "`order_items` exists to solve three critical database challenges:
+> 
+> 1. **Relational Normalization & 1-to-Many Granularity**:
+>    - An order typically contains multiple distinct products in variable quantities. A single flat table cannot represent this without either duplicating order header rows (violating First Normal Form) or packing JSON arrays into a single column.
+> 
+> 2. **Historical Price & Snapshot Integrity (Preventing Price Drift)**:
+>    - Products change prices, titles, and specifications over time. If `order_items` only stored `product_id` and referenced `products.price` via SQL JOINs, any future catalog price increase would retroactively distort past invoices and tax records.
+>    - In UrbanNest, `order_items` stores:
+>      - `product_name`: Title at time of checkout.
+>      - `product_price`: Exact unit price locked at time of sale.
+>      - `quantity`: Number of units purchased.
+>      - `line_total`: Line item total (`product_price * quantity`).
+> 
+> 3. **Partial Fulfillment, Returns, and Item-Level Analytics**:
+>    - In enterprise e-commerce, customers frequently return 1 item out of 4, or one item is backordered while the rest ship. Having individual `order_items` rows allows line-item tracking, refund calculations, inventory restoration, and relational analytics (e.g. 'Which furniture pieces are frequently bought together?')."
+
+---
+
+### Question 32: Why is TanStack Query used here alongside Next.js Server Components?
+
+**Model Answer:**
+> "While Next.js Server Components excel at initial server-rendered HTML for instant First Contentful Paint and SEO, dynamic customer portals and operational back-offices require interactive client-side state lifecycles:
+> 
+> 1. **SSR Hydration Architecture**:
+>    - In `/orders`, `/orders/[id]`, and `/admin/orders`, the Server Component executes `queryClient.prefetchQuery()` on the server, serializes the cache via `dehydrate()`, and passes it into `<HydrationBoundary>`.
+>    - The browser mounts with instant, fully populated DOM (zero loading flicker) while TanStack Query takes over background caching and polling.
+> 
+> 2. **Instant Cache Invalidation upon Server Actions**:
+>    - In `/admin/orders`, when an administrator updates an order's status from `pending` to `shipped` via `updateOrderStatusAction`, calling `queryClient.invalidateQueries({ queryKey: orderQueryKeys.all })` automatically triggers background refetches and immediately synchronizes the UI without a disruptive full-page reload.
+> 
+> 3. **Automatic Deduplication & Granular Key Hierarchy**:
+>    - With query keys structured as `['orders', 'user']`, `['orders', 'admin']`, and `['orders', 'detail', id]`, simultaneous components querying the same order share a single inflight request, eliminating redundant network waterfalls."
+
+---
+
+### Question 33: Explain the UrbanNest Checkout Architecture from Cart to Order Placement.
+
+**Model Answer:**
+> "The checkout architecture follows a defense-in-depth, zero-trust pattern across client and server:
+> 
+> 1. **Client Form & Validation Layer (`CheckoutForm`)**:
+>    - Implemented with **React Hook Form** and **Zod** (`shippingAddressSchema`).
+>    - Collects 7 standardized shipping fields (`full_name`, `phone`, `address_line1`, `address_line2`, `city`, `state`, `postal_code`).
+>    - Renders real-time live Order Summary from local Zustand cart store with subtotal, white-glove shipping threshold logic, and estimated tax.
+> 
+> 2. **Client-to-Server Boundary (Server Action)**:
+>    - The form submits directly to `createOrderAction` (`features/orders/actions.ts`).
+>    - Notice what is sent: **Only product IDs and quantities** alongside the shipping address. The client NEVER transmits unit prices, subtotals, or discounts.
+> 
+> 3. **Server Validation & Price Integrity**:
+>    - Enforces authentication via `requireAuth()`.
+>    - Re-queries the live `products` table in Supabase PostgreSQL by IDs to verify `is_published = true`, real database `price`, and `stock >= quantity`.
+>    - Re-calculates subtotal, shipping fee ($0 if >= $500 else $49), tax (8%), and total amount purely on the server.
+> 
+> 4. **Atomic Insertion & Inventory Decrement**:
+>    - Inserts the master record into `public.orders`.
+>    - Inserts all item snapshots into `public.order_items`.
+>    - Decrements stock in `products` for all items atomically.
+>    - Revalidates cached paths (`/orders`, `/admin/orders`, `/products`) using `revalidatePath()`.
+> 
+> 5. **Client Resolution & Navigation**:
+>    - Upon receiving `{ success: true, orderId, orderNumber }`, the client invokes `clearCart()` on the Zustand store and performs client routing to `/order-success?orderId=...&orderNumber=...`."
+
+---
+
+### Question 34: How does the Guest Cart differ from the Database Order Flow?
+
+**Model Answer:**
+> "In modern luxury e-commerce, forcing users to register before browsing or adding items to their cart creates friction and tanks conversion rates.
+> 
+> 1. **Guest Cart (Local Memory & Storage)**:
+>    - Powered by **Zustand** with `persist` middleware targeting browser `localStorage`.
+>    - Requires zero server calls, zero database writes, and zero latency.
+>    - Operates completely offline or for anonymous users.
+>    - Protected by SSR hydration guards (`isHydrated` check) to prevent React hydration mismatch errors.
+> 
+> 2. **Authentication Gate at Checkout**:
+>    - When the guest clicks 'Proceed to Checkout', route guard `/checkout` calls `requireAuth()`.
+>    - If unauthenticated, the user is redirected to `/login?redirectTo=/checkout`.
+>    - Because the cart is in `localStorage`, logging in does NOT lose their cart items.
+> 
+> 3. **Database Order Flow**:
+>    - Once authenticated, checkout creates a durable, relational database record in PostgreSQL.
+>    - Protected by PostgreSQL Row Level Security (RLS) policies:
+>      - Customers can only SELECT and INSERT their own orders (`auth.uid() = user_id`).
+>      - Administrators can SELECT all orders and UPDATE status (`public.is_admin() = true`).
+>    - Immediately upon successful order creation, the local cart is emptied via `clearCart()`, completing the transition from transient client browsing to permanent database order."
+
+---
+
+### Question 35: How did you implement zero-downtime currency migration (USD to INR) and resilient image fallback architecture in Next.js 16 + Supabase?
+
+**Model Answer:**
+> "Converting an active luxury catalog from USD to INR requires a synchronized strategy spanning database records, frontend formatting utilities, and asset fallbacks:
+> 
+> 1. **Database-Level Atomic Conversion**:
+>    - Rather than performing on-the-fly currency conversion on every client render (which causes rounding flicker and checkout mismatch), prices are stored directly in INR as integers in Supabase (`price = ROUND(price * 83)`).
+>    - SQL migration guarded with `WHERE price < 10000` prevents accidental double-conversion.
+> 
+> 2. **Localized Currency Formatting Utility**:
+>    - Built `formatINR(value)` using `new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 })`.
+>    - Formats numbers in standard Indian Rupee notation (e.g. ₹1,17,860 instead of $1,420.00).
+>    - Replaced all hardcoded `$` symbols in cart totals, shipping rules (Free White-Glove delivery over ₹40,000), filter thresholds, and checkout summaries.
+> 
+> 3. **Image Catalog Cleanup & Unique Asset Guarantee**:
+>    - Audited all 34 catalog items. Completely removed inappropriate office stationery flat-lays (calculators/pens/sticky notes) and replaced with authentic high-resolution luxury furniture assets (1200px+).
+>    - Eliminated duplicate images across categories so every single product features a distinct, category-accurate hero image.
+> 
+> 4. **Resilient Fallback Component (`ProductImageFallback`)**:
+>    - Built `SafeProductImage` wrapping `next/image` with `onError` state capture.
+>    - If an image fails to load or the source URL is missing, it automatically renders an elegant branded fallback container (`#F8F6F2` background, armchair monogram, subtle radial pattern, and 'Studio Archive: Image Unavailable' message) matching the luxury aesthetic."
 

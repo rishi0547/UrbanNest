@@ -3,6 +3,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/lib/query-client";
 import { productQueryKeys } from "@/features/products/catalog/query-keys";
 import { getProducts, getCategories } from "@/features/products/catalog/api";
+import { createClient } from "@/lib/supabase/server";
 import { StorefrontNav } from "@/components/storefront-nav";
 import { SiteFooter } from "@/components/home/site-footer";
 import { CollectionHero } from "@/features/products/catalog/components/collection-hero";
@@ -12,10 +13,6 @@ import { ProductGrid } from "@/features/products/catalog/components/product-grid
 import { BenefitsStrip } from "@/features/products/catalog/components/benefits-strip";
 import { CatalogShowcaseSection } from "@/features/products/catalog/components/catalog-showcase-section";
 import { InspirationShowcase } from "@/features/products/catalog/components/inspiration-showcase";
-import {
-  NEW_ARRIVALS_PRODUCTS,
-  BEST_SELLERS_PRODUCTS,
-} from "@/features/products/catalog/catalog-data";
 
 export const metadata: Metadata = {
   title: "Architectural Living Catalog | UrbanNest Luxury Living",
@@ -26,18 +23,21 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function ProductsPage() {
+  const supabase = await createClient();
   const queryClient = getQueryClient();
 
   // Prefetch products and categories into server query cache for instant first paint
-  await Promise.all([
+  const [, , newArrivals, bestSellers] = await Promise.all([
     queryClient.prefetchQuery({
       queryKey: productQueryKeys.list({}),
-      queryFn: () => getProducts({}),
+      queryFn: () => getProducts({}, supabase),
     }),
     queryClient.prefetchQuery({
       queryKey: productQueryKeys.categories(),
-      queryFn: () => getCategories(),
+      queryFn: () => getCategories(supabase),
     }),
+    getProducts({ limit: 4, sortBy: "newest" }, supabase),
+    getProducts({ limit: 4, featuredOnly: true }, supabase),
   ]);
 
   return (
@@ -64,21 +64,21 @@ export default async function ProductsPage() {
       {/* 6. Section 6: Benefits Strip (Full-Width Trust Strip) */}
       <BenefitsStrip />
 
-      {/* 7. Section 7: New Arrivals */}
+      {/* 7. Section 7: New Arrivals (Real Database Products) */}
       <CatalogShowcaseSection
         kicker="Just Released"
         title="New Arrivals"
         subtitle="Recent studio releases crafted with sculptured lines and artisan joinery."
-        products={NEW_ARRIVALS_PRODUCTS}
+        products={newArrivals}
         viewAllLabel="View All New Arrivals"
       />
 
-      {/* 8. Section 8: Best Sellers */}
+      {/* 8. Section 8: Best Sellers (Real Database Products) */}
       <CatalogShowcaseSection
         kicker="Studio Icons"
         title="Best Sellers"
         subtitle="Our most coveted furniture staples, celebrated by interior architects worldwide."
-        products={BEST_SELLERS_PRODUCTS}
+        products={bestSellers}
         viewAllLabel="View All Best Sellers"
       />
 

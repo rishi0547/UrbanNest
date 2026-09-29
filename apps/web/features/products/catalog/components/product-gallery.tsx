@@ -4,6 +4,7 @@ import { useState, useRef, MouseEvent } from "react";
 import Image from "next/image";
 import { Sparkles, Maximize2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ProductImageFallback } from "@/components/ProductImageFallback";
 import type { CatalogProduct } from "../types";
 
 interface ProductGalleryProps {
@@ -21,7 +22,15 @@ const curatedLifestyleAdditions = [
 
 export function ProductGallery({ product }: ProductGalleryProps) {
   // Build a comprehensive gallery of at least 4-5 photos
-  const rawImages = product.images && product.images.length > 0 ? product.images : [];
+  const baseImage = product.image_url || product.images?.[0];
+  const rawImages =
+    product.gallery_images && product.gallery_images.length > 0
+      ? product.gallery_images
+      : product.images && product.images.length > 0
+      ? product.images
+      : baseImage
+      ? [baseImage]
+      : [];
   const galleryImages = [
     ...rawImages,
     ...curatedLifestyleAdditions.slice(0, Math.max(0, 5 - rawImages.length)),
@@ -109,9 +118,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
               }
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-[#6B7280]">
-              No image available
-            </div>
+            <ProductImageFallback productTitle={product.title} />
           )}
 
           {/* Floating Badges */}

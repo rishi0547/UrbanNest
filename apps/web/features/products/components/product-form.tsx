@@ -295,12 +295,12 @@ export function ProductForm({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="price">Price (USD)</Label>
+                <Label htmlFor="price">Price (INR - ₹)</Label>
                 <Input
                   id="price"
                   type="number"
-                  step="0.01"
-                  placeholder="890.00"
+                  step="1"
+                  placeholder="14999"
                   disabled={isSubmitting}
                   {...register("price", { valueAsNumber: true })}
                 />

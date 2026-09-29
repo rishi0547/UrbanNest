@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { Package, Sparkles, Star, Heart, ShoppingBag, Check } from "lucide-react";
+import { Sparkles, Star, Heart, ShoppingBag, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/features/cart";
+import { formatINR } from "@/utils/currency";
+import { SafeProductImage } from "@/components/ProductImageFallback";
 import type { CatalogProduct } from "../types";
 
 interface ProductCardProps {
@@ -15,7 +16,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, rating = 4.8 }: ProductCardProps) {
-  const thumbnail = product.images?.[0];
+  const thumbnail = product.image_url || product.images?.[0] || "";
   const isOutOfStock = product.stock <= 0;
   const isLowStock = product.stock > 0 && product.stock <= 5;
   const { addItem } = useCart();
@@ -44,7 +45,7 @@ export function ProductCard({ product, rating = 4.8 }: ProductCardProps) {
     });
 
     setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2200);
+    setTimeout(() => setIsAdded(false), 2000);
   };
 
   return (
@@ -54,20 +55,14 @@ export function ProductCard({ product, rating = 4.8 }: ProductCardProps) {
         href={`/products/${product.slug}`}
         className="relative aspect-[4/5] w-full rounded-xl overflow-hidden bg-[#F0EDE8] block mb-3.5"
       >
-        {thumbnail ? (
-          <Image
-            src={thumbnail}
-            alt={product.title}
-            fill
-            unoptimized
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-[#6B7280]">
-            <Package className="size-10" />
-          </div>
-        )}
+        <SafeProductImage
+          src={thumbnail}
+          alt={product.title}
+          fill
+          unoptimized
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+        />
 
         {/* Top-Left Floating Badges */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10 pointer-events-none">
@@ -145,16 +140,16 @@ export function ProductCard({ product, rating = 4.8 }: ProductCardProps) {
         {/* Pricing Line */}
         <div className="flex items-baseline gap-2 mb-3">
           <span className="text-sm sm:text-base font-semibold text-[#1A1A1A]">
-            ${currentPrice.toFixed(2)}
+            {formatINR(currentPrice)}
           </span>
           {hasDiscount && (
             <span className="text-xs text-[#6B7280] line-through font-light">
-              ${comparePrice.toFixed(2)}
+              {formatINR(comparePrice)}
             </span>
           )}
           {hasDiscount && (
             <span className="text-[10px] font-semibold text-[#5D6B4D] bg-[#5D6B4D]/10 px-1.5 py-0.5 rounded">
-              -${savings.toFixed(0)}
+              Save {formatINR(savings)}
             </span>
           )}
         </div>

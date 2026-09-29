@@ -8,10 +8,14 @@ export type OrderStatus =
 export interface ShippingAddress {
   full_name: string;
   phone: string;
-  address: string;
+  address_line1: string;
+  address_line2?: string | null;
   city: string;
   state: string;
-  pincode: string;
+  postal_code: string;
+  // Backward compatibility aliases
+  address?: string;
+  pincode?: string;
 }
 
 export interface OrderItemProduct {
@@ -24,19 +28,26 @@ export interface OrderItemProduct {
 export interface OrderItem {
   id: string;
   order_id: string;
-  product_id: string;
+  product_id?: string | null;
+  product_name: string;
+  product_price: number;
   quantity: number;
-  price: number;
+  line_total: number;
+  price?: number; // alias
   created_at: string;
   product?: OrderItemProduct | null;
 }
 
 export interface Order {
   id: string;
-  order_number: string;
+  order_number?: string;
   user_id: string;
   status: OrderStatus;
-  total_amount: number;
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
+  total_amount?: number; // alias
   shipping_address: ShippingAddress;
   created_at: string;
   updated_at: string;

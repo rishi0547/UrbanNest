@@ -36,7 +36,10 @@ export async function createOrderAction(
     };
   }
 
-  const { shipping, items } = parseResult.data;
+  const payload = parseResult.data;
+  console.log("Order Payload:", payload);
+
+  const { shipping, items } = payload;
 
   if (items.length === 0) {
     return {
@@ -64,6 +67,9 @@ export async function createOrderAction(
   // 2. Validate availability and stock constraints
   for (const item of items) {
     const matchedProduct = dbProducts.find((p) => p.id === item.productId);
+    console.log("Cart Item", item);
+    console.log("Database Product", matchedProduct);
+
     if (!matchedProduct || !matchedProduct.is_published) {
       return {
         success: false,
@@ -85,30 +91,42 @@ export async function createOrderAction(
     return sum + Number(prod.price) * item.quantity;
   }, 0);
 
-  const FREE_SHIPPING_THRESHOLD = 500;
-  const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 49;
-  const tax = Math.round(subtotal * 0.08 * 100) / 100;
-  const totalAmount = Math.round((subtotal + shippingCost + tax) * 100) / 100;
+  const FREE_SHIPPING_THRESHOLD = 9999;
+  const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 999;
+  const tax = Math.round(subtotal * 0.08);
+  const totalAmount = Math.round(subtotal + shippingCost + tax);
 
   // 4. Generate unique business order identifier (e.g. UN-2026-894123)
   const orderNumber = `UN-${new Date().getFullYear()}-${Math.floor(
     100000 + Math.random() * 900000
   )}`;
 
-  // 5. Insert order header
-  const { data: newOrder, error: orderError } = await supabase
+  // 5. Insert order header strictly matching public.orders schema
+  const orderInsert = {
+    order_number: orderNumber,
+    user_id: user.id,
+    status: "pending",
+    total_amount: totalAmount,
+    shipping_address: {
+      full_name: shipping.full_name,
+      phone: shipping.phone,
+      address_line1: shipping.address_line1,
+      address_line2: shipping.address_line2 || "",
+      city: shipping.city,
+      state: shipping.state,
+      postal_code: shipping.postal_code,
+    },
+  };
+
+  console.log("Orders Table Insert:", orderInsert);
+
+  const { data: insertedOrder, error: orderError } = await supabase
     .from("orders")
-    .insert({
-      order_number: orderNumber,
-      user_id: user.id,
-      status: "pending",
-      total_amount: totalAmount,
-      shipping_address: shipping,
-    })
+    .insert(orderInsert)
     .select("id, order_number")
     .single();
 
-  if (orderError || !newOrder) {
+  if (orderError || !insertedOrder) {
     console.error("Order creation failed:", orderError);
     return {
       success: false,
@@ -116,11 +134,11 @@ export async function createOrderAction(
     };
   }
 
-  // 6. Insert order line items capturing immutable historical purchase price
+  // 6. Insert order line items matching public.order_items schema
   const lineItems = items.map((item) => {
     const prod = dbProducts.find((p) => p.id === item.productId)!;
     return {
-      order_id: newOrder.id,
+      order_id: insertedOrder.id,
       product_id: item.productId,
       quantity: item.quantity,
       price: Number(prod.price),
@@ -157,8 +175,8 @@ export async function createOrderAction(
 
   return {
     success: true,
-    orderNumber: newOrder.order_number,
-    orderId: newOrder.id,
+    orderNumber: insertedOrder.order_number,
+    orderId: insertedOrder.id,
   };
 }
 

@@ -12,11 +12,17 @@ export const shippingAddressSchema = z.object({
     .min(7, "Phone number must be at least 7 digits")
     .max(20, "Phone number cannot exceed 20 characters")
     .regex(/^[+0-9\s\-()]+$/, "Please enter a valid phone number"),
-  address: z
+  address_line1: z
     .string()
     .trim()
     .min(5, "Street address must be at least 5 characters")
     .max(250, "Address is too long"),
+  address_line2: z
+    .string()
+    .trim()
+    .max(250, "Apartment/suite is too long")
+    .optional()
+    .or(z.literal("")),
   city: z
     .string()
     .trim()
@@ -27,17 +33,28 @@ export const shippingAddressSchema = z.object({
     .trim()
     .min(2, "State or Province is required")
     .max(100, "State name is too long"),
-  pincode: z
+  postal_code: z
     .string()
     .trim()
-    .min(3, "Postal code/pincode is required")
+    .min(3, "Postal code is required")
     .max(12, "Postal code is too long"),
+  // Backward compatibility optional fields if submitted from older forms
+  address: z.string().optional(),
+  pincode: z.string().optional(),
 });
 
 export type ShippingAddressInput = z.infer<typeof shippingAddressSchema>;
 
+export const productUuidSchema = z
+  .string()
+  .trim()
+  .regex(
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    "Invalid product identifier"
+  );
+
 export const checkoutItemSchema = z.object({
-  productId: z.string().uuid("Invalid product identifier"),
+  productId: productUuidSchema,
   quantity: z.number().int().min(1, "Quantity must be at least 1"),
 });
 

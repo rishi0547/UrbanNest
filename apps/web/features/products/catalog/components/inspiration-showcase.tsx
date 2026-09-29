@@ -67,7 +67,7 @@ export function InspirationShowcase() {
 
             {/* CTA Button */}
             <div className="pt-2">
-              <Link href="/#inspiration">
+              <Link href="/products?featured=true">
                 <Button className="h-12 px-7 rounded-full bg-[#1A1A1A] hover:bg-[#5D6B4D] text-white text-sm font-semibold transition-all shadow-xs gap-2 cursor-pointer">
                   Explore Inspiration
                   <ArrowRight className="size-4" />

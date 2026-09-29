@@ -14,6 +14,8 @@ export interface CatalogProduct {
   compare_at_price: number | null;
   stock: number;
   images: string[];
+  image_url?: string | null;
+  gallery_images?: string[] | null;
   category_id: string;
   is_featured: boolean;
   is_published: boolean;

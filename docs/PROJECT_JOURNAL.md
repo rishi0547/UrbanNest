@@ -264,3 +264,47 @@ A living document tracking the technical evolution, architectural decisions, spr
   - Performed browser visual verification across all sections using `browser_subagent` and direct screenshot inspection.
 - **Decisions Made**: Adopted ADR-012 (Luxury Furniture Brand Design System & Natura-Inspired Homepage Architecture).
 - **Next Focus**: Live payment gateways (Stripe/Razorpay), product review submission, and multi-image interactive carousel on details page.
+
+### Entry: Week 15 (Day 11) - Phase 1: Checkout & Order Creation System
+- **Tasks Executed**:
+  - Implemented end-to-end checkout and order creation pipeline:
+    - **Database Migration**: Appended Section 10 to `docs/SQL_QUERIES.sql` specifying `orders` and `order_items` tables, performance indexes, updated_at trigger, and granular RLS policies (customer view/create own, admin view/update status). Verified without executing SQL automatically.
+    - **Schemas & Types**: Updated `features/orders/schemas.ts` and `features/orders/types.ts` with standardized 7 shipping fields (`full_name`, `phone`, `address_line1`, `address_line2`, `city`, `state`, `postal_code`) and backward-compatibility aliases (`address`, `pincode`).
+    - **Atomic Server Action**: Enhanced `createOrderAction` in `features/orders/actions.ts` to compute financial breakdown (`subtotal`, `shipping`, `tax`, `total`), verify products in PostgreSQL, prevent price tampering, insert `orders` and `order_items` with historical snapshots, decrement stock, and revalidate paths.
+    - **Checkout Interface**: Refined `apps/web/features/orders/components/checkout-form.tsx` with all 7 shipping fields, React Hook Form + Zod validation, order summary with live Zustand cart calculations, automated cart clearance via `clearCart()`, and redirection to `/order-success`.
+    - **Luxury Order Success Page**: Built `apps/web/app/order-success/page.tsx` with Playfair Display heading, emerald confirmation icon, dynamic order reference, and dual CTA buttons ("View Order Details" / "View All Orders" and "Continue Shopping").
+    - **Order History & Details**: Updated `features/orders/components/order-status-badge.tsx` with exact status colors (Pending: Amber, Processing: Blue, Shipped: Purple, Delivered: Emerald, Cancelled: Red). Built `features/orders/components/order-details-view.tsx` and created `/orders/[id]/page.tsx` displaying Shipping Details, Ordered Products, and Order Summary with TanStack Query SSR prefetching.
+    - **Admin Fulfillment Console**: Standardized `apps/web/features/orders/components/admin-orders-table.tsx` with required columns (`Order ID`, `Customer`, `Date`, `Status`, `Amount`, `Update Status`) and live status transition dropdown updating Supabase and invalidating `orderQueryKeys.all`.
+  - Created domain module barrel export in `apps/web/features/orders/index.ts`.
+  - Added UI primitive `components/ui/separator.tsx`.
+### Entry: Week 15 (Day 12) - Catalog Cleanup, INR Currency Migration & Luxury Asset Audit
+- **Tasks Executed**:
+  - **Complete Store Currency Conversion (USD to INR at ₹83)**:
+    - Created `utils/currency.ts` & `lib/currency.ts` with `formatINR(value)` using `new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 })`.
+    - Converted all 34 product records in Supabase to INR prices (`price = ROUND(price * 83)`, `compare_at_price = ROUND(compare_at_price * 83)`).
+    - Replaced all hardcoded `$` symbols across:
+      - Product Cards (`features/products/catalog/components/product-card.tsx`)
+      - Product Details Page (`features/products/catalog/components/product-info-panel.tsx`)
+      - Sticky Purchase Bar (`features/products/catalog/components/sticky-purchase-bar.tsx`)
+      - Related Products Carousel (`features/products/catalog/components/related-products-section.tsx`)
+      - Filter Bar & Thresholds (`features/products/catalog/components/compact-filter-bar.tsx`, `product-grid.tsx`)
+      - Homepage Featured Collection (`components/home/featured-collection.tsx`)
+      - Shopping Cart View & Shipping Thresholds (`features/cart/components/cart-view.tsx`)
+      - Checkout Flow & Order Creation (`features/orders/components/checkout-form.tsx`, `features/orders/actions.ts`, `api.ts`)
+      - Order Details & User History (`features/orders/components/order-details-view.tsx`, `user-orders-view.tsx`)
+      - Admin Fulfillment & Product Inventory Tables (`features/orders/components/admin-orders-table.tsx`, `app/admin/products/page.tsx`)
+  - **Catalog Imagery Cleanup & Duplicate Elimination**:
+    - Eradicated incorrect office stationery flat-lay image (`photo-1518455027359-f3f8164ba6bd` with calculator/pen/sticky notes) from Artisan Solid Oak Writing Desk; replaced with authentic executive desk photography.
+    - Resolved all duplicate hero images across all 34 products so every product possesses a unique, verified 200 OK, high-resolution (min 1200px) luxury furniture photograph matching its taxonomy.
+    - Verified HTTP 200 responses on all 34 assigned Unsplash image URLs.
+  - **Fallback Image System (`ProductImageFallback`)**:
+    - Created `components/ui/product-image-fallback.tsx` and exported `ProductImageFallback` and `SafeProductImage` (`components/ProductImageFallback.tsx`).
+    - Styled with warm light cream background (`#F8F6F2`), subtle radial grid texture, armchair iconography, "Image Unavailable" notice, and automatic `onError` failure recovery.
+  - **Database Migration Script**:
+    - Appended Section 12 to `docs/SQL_QUERIES.sql` specifying schema alterations for `image_url` and `gallery_images`, price updates to INR, and array syncing.
+  - **Quality Assurance**:
+    - `pnpm --filter web check-types` passed with 0 errors.
+    - `pnpm --filter web lint` passed with 0 errors / 0 warnings.
+    - `pnpm --filter web build` completed successfully generating all production routes with Turbopack.
+- **Decisions Made**: Adopted ADR-013 (Indian Rupee Currency Standardization and Resilient Fallback Image Architecture).
+- **Next Focus**: Multi-currency switcher, Razorpay Indian payment gateway integration, and localized address validation.

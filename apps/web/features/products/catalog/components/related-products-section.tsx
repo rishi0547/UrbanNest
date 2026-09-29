@@ -2,60 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Star, Heart, ShoppingBag, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/features/cart";
+import { formatINR } from "@/utils/currency";
+import { SafeProductImage } from "@/components/ProductImageFallback";
 import { useRelatedProducts } from "../queries";
 import type { CatalogProduct } from "../types";
 
 interface RelatedProductsSectionProps {
   currentProduct: CatalogProduct;
 }
-
-// Fallback curated products to guarantee 4 complete cards even if database is small
-const fallbackRelated = [
-  {
-    id: "rel-1",
-    title: "Haven Dining Table",
-    slug: "haven-dining-table",
-    price: 699,
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=700&q=80&fit=crop",
-    colors: ["#B8977E", "#5A4232", "#1F1F1E"],
-    categoryName: "Dining Room",
-  },
-  {
-    id: "rel-2",
-    title: "Casa Lounge Chair",
-    slug: "casa-lounge-chair",
-    price: 299,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=700&q=80&fit=crop",
-    colors: ["#5D6B4D", "#D4C5A9", "#3E3B36"],
-    categoryName: "Living Room",
-  },
-  {
-    id: "rel-3",
-    title: "Milo Sideboard",
-    slug: "milo-sideboard",
-    price: 449,
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=700&q=80&fit=crop",
-    colors: ["#C4A482", "#3D3D3D"],
-    categoryName: "Storage",
-  },
-  {
-    id: "rel-4",
-    title: "Sora Solid Oak Bed",
-    slug: "sora-solid-oak-bed",
-    price: 1350,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=700&q=80&fit=crop",
-    colors: ["#D4C5A9", "#8B9E83", "#2B2B2A"],
-    categoryName: "Bedroom",
-  },
-];
 
 export function RelatedProductsSection({ currentProduct }: RelatedProductsSectionProps) {
   const { data: dbRelated, isLoading } = useRelatedProducts(
@@ -67,24 +24,34 @@ export function RelatedProductsSection({ currentProduct }: RelatedProductsSectio
   const { addItem } = useCart();
   const [quickAddedId, setQuickAddedId] = useState<string | null>(null);
 
-  // Combine database products with fallbacks to always guarantee 4 luxury cards
-  const displayProducts = fallbackRelated.map((fb, idx) => {
-    const real = dbRelated?.[idx];
-    if (real) {
-      return {
-        id: real.id,
-        title: real.title,
-        slug: real.slug,
-        price: Number(real.price),
-        rating: 4.8,
-        image: real.images?.[0] || fb.image,
-        colors: fb.colors,
-        categoryName: real.category?.name || fb.categoryName,
-        stock: real.stock,
-      };
-    }
-    return { ...fb, stock: 10 };
-  });
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-8 w-48 rounded bg-[#E5E2DC]" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, idx) => (
+            <div key={idx} className="h-72 rounded-2xl bg-[#E5E2DC]/50" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!dbRelated || dbRelated.length === 0) {
+    return null;
+  }
+
+  const displayProducts = dbRelated.slice(0, 4).map((real, idx) => ({
+    id: real.id,
+    title: real.title,
+    slug: real.slug,
+    price: Number(real.price),
+    rating: idx % 2 === 0 ? 4.9 : 4.8,
+    image: real.image_url || real.images?.[0] || "",
+    colors: ["#5D6B4D", "#D4C5A9", "#3E3B36"],
+    categoryName: real.category?.name || "Architectural Piece",
+    stock: real.stock,
+  }));
 
   const handleQuickAdd = (product: typeof displayProducts[0]) => {
     addItem({
@@ -134,7 +101,7 @@ export function RelatedProductsSection({ currentProduct }: RelatedProductsSectio
               href={`/products/${item.slug}`}
               className="relative aspect-[4/5] w-full rounded-xl overflow-hidden bg-[#F0EDE8] block mb-3.5"
             >
-              <Image
+              <SafeProductImage
                 src={item.image}
                 alt={item.title}
                 fill
@@ -178,7 +145,7 @@ export function RelatedProductsSection({ currentProduct }: RelatedProductsSectio
 
               {/* Price */}
               <p className="text-sm sm:text-[15px] font-semibold text-[#1A1A1A] mb-3">
-                ${item.price.toFixed(2)}
+                {formatINR(item.price)}
               </p>
 
               {/* Color Swatches & Quick Add Button */}

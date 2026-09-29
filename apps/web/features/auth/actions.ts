@@ -73,3 +73,48 @@ export async function logoutAction(): Promise<void> {
   revalidatePath("/", "layout");
   redirect("/login");
 }
+
+export async function updateProfileAction(data: {
+  fullName: string;
+  avatarUrl?: string;
+}): Promise<AuthActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: "Unauthorized. Please log in." };
+  }
+
+  const trimmedName = data.fullName?.trim();
+  if (!trimmedName || trimmedName.length < 2) {
+    return { success: false, error: "Please enter a valid full name (at least 2 characters)." };
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      full_name: trimmedName,
+      avatar_url: data.avatarUrl?.trim() || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  // Also sync user metadata
+  await supabase.auth.updateUser({
+    data: {
+      full_name: trimmedName,
+      avatar_url: data.avatarUrl?.trim() || null,
+    },
+  });
+
+  revalidatePath("/profile");
+  revalidatePath("/", "layout");
+  return { success: true };
+}
+

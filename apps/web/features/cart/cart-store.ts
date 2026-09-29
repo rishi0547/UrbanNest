@@ -39,7 +39,7 @@ function calculateTotalItems(items: CartItem[]): number {
 }
 
 /**
- * Calculates cumulative subtotal price in USD across all items.
+ * Calculates cumulative subtotal price in INR across all items.
  */
 function calculateSubtotal(items: CartItem[]): number {
   const sum = items.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -57,9 +57,12 @@ export const useCartStore = create<CartStore>()(
       subtotal: 0,
 
       addItem: (product, quantityToAdd = 1) => {
+        const resolvedId = product.productId || (product as any).id;
+        if (!resolvedId) return;
+
         const currentItems = get().items;
         const existingIndex = currentItems.findIndex(
-          (item) => item.productId === product.productId
+          (item) => item.productId === resolvedId
         );
 
         let newItems: CartItem[];
@@ -80,7 +83,8 @@ export const useCartStore = create<CartStore>()(
             ...currentItems,
             {
               ...product,
-              id: product.productId,
+              id: resolvedId,
+              productId: resolvedId,
               quantity: initialQty,
             },
           ];
@@ -94,7 +98,7 @@ export const useCartStore = create<CartStore>()(
       },
 
       removeItem: (productId) => {
-        const newItems = get().items.filter((item) => item.productId !== productId);
+        const newItems = get().items.filter((item) => item.productId !== productId && item.id !== productId);
         set({
           items: newItems,
           totalItems: calculateTotalItems(newItems),
@@ -109,7 +113,7 @@ export const useCartStore = create<CartStore>()(
         }
 
         const newItems = get().items.map((item) => {
-          if (item.productId === productId) {
+          if (item.productId === productId || item.id === productId) {
             const clampedQty = Math.min(Math.max(1, quantity), item.stock);
             return { ...item, quantity: clampedQty };
           }
@@ -134,6 +138,24 @@ export const useCartStore = create<CartStore>()(
     {
       name: "urbannest-cart-storage",
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        if (state && Array.isArray(state.items)) {
+          // Filter out invalid items (must have valid 36-char hex UUID)
+          const validItems = state.items.filter(
+            (item) =>
+              item &&
+              typeof item.productId === "string" &&
+              /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
+                item.productId
+              )
+          );
+          if (validItems.length !== state.items.length) {
+            state.items = validItems;
+            state.totalItems = calculateTotalItems(validItems);
+            state.subtotal = calculateSubtotal(validItems);
+          }
+        }
+      },
     }
   )
 );

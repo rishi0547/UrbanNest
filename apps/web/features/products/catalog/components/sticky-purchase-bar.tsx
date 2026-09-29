@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ShoppingBag, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/features/cart";
+import { formatINR } from "@/utils/currency";
 import type { CatalogProduct } from "../types";
 
 interface StickyPurchaseBarProps {
@@ -76,7 +77,7 @@ export function StickyPurchaseBar({ product, selectedColorHex }: StickyPurchaseB
             </h4>
             <div className="flex items-center gap-2 text-xs text-[#6B7280]">
               <span className="font-semibold text-[#1A1A1A]">
-                ${currentPrice.toFixed(2)}
+                {formatINR(currentPrice)}
               </span>
               <span className="hidden sm:inline">•</span>
               <span className="hidden sm:flex items-center gap-1">

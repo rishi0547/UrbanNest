@@ -15,7 +15,7 @@ export const productSchema = z.object({
     .min(10, "Description must be at least 10 characters"),
   price: z
     .number({ message: "Price must be a valid number" })
-    .min(0.01, "Price must be greater than $0.00"),
+    .min(1, "Price must be greater than ₹0"),
   stock: z
     .number({ message: "Stock must be a valid integer" })
     .int("Stock must be an integer")

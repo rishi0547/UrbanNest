@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   ShoppingBag,
   Trash2,
@@ -11,26 +12,30 @@ import {
   Truck,
   ShieldCheck,
   Package,
+  Loader2,
 } from "lucide-react";
 import { useCart } from "../cart-store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatINR } from "@/utils/currency";
+import { SafeProductImage } from "@/components/ProductImageFallback";
 
 export function CartView() {
+  const router = useRouter();
   const { items, totalItems, subtotal, removeItem, updateQuantity, clearCart, isHydrated } =
     useCart();
-  const [checkoutNotice, setCheckoutNotice] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  // Delivery calculation: Free for orders >= $500, otherwise $49
-  const FREE_SHIPPING_THRESHOLD = 500;
+  // Delivery calculation: Free for orders >= ₹9,999, otherwise ₹999
+  const FREE_SHIPPING_THRESHOLD = 9999;
   const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
-  const shippingCost = isFreeShipping || subtotal === 0 ? 0 : 49;
-  const estimatedTax = Math.round(subtotal * 0.08 * 100) / 100; // 8% tax
-  const orderTotal = Math.round((subtotal + shippingCost + estimatedTax) * 100) / 100;
+  const shippingCost = isFreeShipping || subtotal === 0 ? 0 : 999;
+  const estimatedTax = Math.round(subtotal * 0.08); // 8% tax
+  const orderTotal = Math.round(subtotal + shippingCost + estimatedTax);
 
   const handleCheckoutClick = () => {
-    setCheckoutNotice(true);
-    setTimeout(() => setCheckoutNotice(false), 5000);
+    setIsNavigating(true);
+    router.push("/checkout");
   };
 
   // SSR Hydration Skeleton
@@ -121,19 +126,13 @@ export function CartView() {
                     href={`/products/${item.slug}`}
                     className="relative size-20 sm:size-24 rounded-xl overflow-hidden border border-border bg-muted/40 shrink-0"
                   >
-                    {item.image ? (
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        sizes="96px"
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                        <Package className="size-6" />
-                      </div>
-                    )}
+                    <SafeProductImage
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      sizes="96px"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
                   </Link>
 
                   {/* Product Details & Category */}
@@ -152,7 +151,7 @@ export function CartView() {
                       {item.title}
                     </Link>
                     <div className="text-xs font-mono text-muted-foreground">
-                      Unit: ${item.price.toFixed(2)}
+                      Unit: {formatINR(item.price)}
                     </div>
                   </div>
 
@@ -190,7 +189,7 @@ export function CartView() {
                   {/* Line Total Price & Delete Action */}
                   <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 shrink-0">
                     <span className="text-base font-bold text-foreground font-mono">
-                      ${lineTotal}
+                      {formatINR(item.price * item.quantity)}
                     </span>
                     <button
                       type="button"
@@ -239,7 +238,7 @@ export function CartView() {
                   </Badge>
                 ) : (
                   <span className="text-muted-foreground">
-                    ${(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)} away
+                    {formatINR(FREE_SHIPPING_THRESHOLD - subtotal)} away
                   </span>
                 )}
               </div>
@@ -258,7 +257,7 @@ export function CartView() {
               <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal</span>
                 <span className="font-mono text-foreground font-medium">
-                  ${subtotal.toFixed(2)}
+                  {formatINR(subtotal)}
                 </span>
               </div>
 
@@ -268,7 +267,7 @@ export function CartView() {
                   {isFreeShipping ? (
                     <span className="text-emerald-500 font-semibold">FREE</span>
                   ) : (
-                    `$${shippingCost.toFixed(2)}`
+                    formatINR(shippingCost)
                   )}
                 </span>
               </div>
@@ -276,14 +275,14 @@ export function CartView() {
               <div className="flex justify-between text-muted-foreground">
                 <span>Estimated Tax (8%)</span>
                 <span className="font-mono text-foreground font-medium">
-                  ${estimatedTax.toFixed(2)}
+                  {formatINR(estimatedTax)}
                 </span>
               </div>
 
               <div className="border-t border-border/60 pt-3 flex justify-between text-base font-bold text-foreground">
                 <span>Total Due</span>
                 <span className="font-mono text-xl text-primary">
-                  ${orderTotal.toFixed(2)}
+                  {formatINR(orderTotal)}
                 </span>
               </div>
             </div>
@@ -293,19 +292,22 @@ export function CartView() {
               <Button
                 type="button"
                 size="lg"
+                disabled={isNavigating}
                 onClick={handleCheckoutClick}
                 className="w-full font-bold text-base shadow-md gap-2"
               >
-                Proceed to Checkout
-                <ArrowRight className="size-4" />
+                {isNavigating ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    <span>Proceeding to Checkout...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Proceed to Checkout</span>
+                    <ArrowRight className="size-4" />
+                  </>
+                )}
               </Button>
-
-              {/* Milestone Notice */}
-              {checkoutNotice && (
-                <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-xs text-primary animate-in fade-in duration-300">
-                  <strong>Ready for Order Processing!</strong> The payment element and atomic database checkout will be configured in the next phase.
-                </div>
-              )}
             </div>
 
             {/* Trust Badges */}

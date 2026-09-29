@@ -14,6 +14,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { DeleteProductButton } from "@/features/products/components/delete-product-button"
+import { formatINR } from "@/utils/currency"
+import { SafeProductImage } from "@/components/ProductImageFallback"
 
 export const metadata: Metadata = {
   title: "Product Catalog | UrbanNest Admin",
@@ -172,7 +174,7 @@ export default async function AdminProductsPage() {
               </thead>
               <tbody className="divide-y divide-border/60">
                 {products.map((product) => {
-                  const thumbnail = product.images?.[0]
+                  const thumbnail = (product as any).image_url || product.images?.[0]
                   return (
                     <tr
                       key={product.id}
@@ -182,17 +184,13 @@ export default async function AdminProductsPage() {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           <div className="relative size-12 rounded-md overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center">
-                            {thumbnail ? (
-                              <Image
-                                src={thumbnail}
-                                alt={product.title}
-                                fill
-                                sizes="48px"
-                                className="object-cover"
-                              />
-                            ) : (
-                              <Package className="size-5 text-muted-foreground" />
-                            )}
+                            <SafeProductImage
+                              src={thumbnail}
+                              alt={product.title}
+                              fill
+                              sizes="48px"
+                              className="object-cover"
+                            />
                           </div>
                           <div className="min-w-0">
                             <div className="font-semibold text-foreground truncate max-w-xs group-hover:text-primary transition-colors">
@@ -218,7 +216,7 @@ export default async function AdminProductsPage() {
 
                       {/* Price */}
                       <td className="py-3 px-4 font-mono font-medium">
-                        ${Number(product.price).toFixed(2)}
+                        {formatINR(Number(product.price))}
                       </td>
 
                       {/* Stock */}

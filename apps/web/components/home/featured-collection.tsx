@@ -5,68 +5,28 @@ import Image from "next/image";
 import { ArrowRight, ChevronLeft, ChevronRight, Heart, Star } from "lucide-react";
 import { MotionWrapper } from "./motion-wrapper";
 import { motion } from "framer-motion";
+import { formatINR } from "@/utils/currency";
+import { SafeProductImage } from "@/components/ProductImageFallback";
 import type { CatalogProduct } from "@/features/products/catalog/types";
 
 interface FeaturedCollectionProps {
   products: CatalogProduct[];
 }
 
-const fallbackProducts = [
-  {
-    id: "fb-1",
-    title: "Luna 3-Seater Sofa",
-    slug: "luna-3-seater-sofa",
-    price: 899,
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=700&q=80&fit=crop",
-    colors: ["#C5B49E", "#7C6354", "#2B2B2A"],
-  },
-  {
-    id: "fb-2",
-    title: "Haven Dining Table",
-    slug: "haven-dining-table",
-    price: 699,
-    rating: 4.7,
-    image: "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=700&q=80&fit=crop",
-    colors: ["#B8977E", "#5A4232", "#1F1F1E"],
-  },
-  {
-    id: "fb-3",
-    title: "Casa Lounge Chair",
-    slug: "casa-lounge-chair",
-    price: 299,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=700&q=80&fit=crop",
-    colors: ["#5D6B4D", "#D4C5A9", "#3E3B36"],
-  },
-  {
-    id: "fb-4",
-    title: "Milo Sideboard",
-    slug: "milo-sideboard",
-    price: 449,
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=700&q=80&fit=crop",
-    colors: ["#C4A482", "#3D3D3D"],
-  },
-];
-
 export function FeaturedCollection({ products }: FeaturedCollectionProps) {
-  // Combine real database products with fallbacks to guarantee 4 balanced cards
-  const displayItems = fallbackProducts.map((fb, idx) => {
-    const real = products[idx];
-    if (real) {
-      return {
-        id: real.id,
-        title: real.title,
-        slug: real.slug,
-        price: Number(real.price),
-        rating: fb.rating,
-        image: real.images?.[0] || fb.image,
-        colors: fb.colors,
-      };
-    }
-    return fb;
-  });
+  const displayItems = products.slice(0, 4).map((real, idx) => ({
+    id: real.id,
+    title: real.title,
+    slug: real.slug,
+    price: Number(real.price),
+    rating: idx % 2 === 0 ? 4.9 : 4.8,
+    image: real.image_url || real.images?.[0] || "",
+    colors: ["#5D6B4D", "#C5B49E", "#2B2B2A"],
+  }));
+
+  if (displayItems.length === 0) {
+    return null;
+  }
 
   return (
     <section className="pt-10 sm:pt-12 lg:pt-[50px] pb-10 sm:pb-12 lg:pb-[50px] bg-[#F8F6F2]">
@@ -128,7 +88,7 @@ export function FeaturedCollection({ products }: FeaturedCollectionProps) {
                       href={`/products/${item.slug}`}
                       className="relative aspect-[4/5] w-full rounded-xl overflow-hidden bg-[#F0EDE8] block mb-3.5"
                     >
-                      <Image
+                      <SafeProductImage
                         src={item.image}
                         alt={item.title}
                         fill
@@ -165,7 +125,7 @@ export function FeaturedCollection({ products }: FeaturedCollectionProps) {
 
                       {/* Price */}
                       <p className="text-sm sm:text-[15px] font-semibold text-[#1A1A1A] mb-3">
-                        ${item.price.toFixed(2)}
+                        {formatINR(item.price)}
                       </p>
 
                       {/* Color Swatches */}

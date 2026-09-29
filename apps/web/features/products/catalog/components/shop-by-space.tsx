@@ -7,31 +7,31 @@ export const SPACES = [
   {
     name: "Living Room",
     slug: "living-room",
-    count: "18 Pieces",
+    count: "8 Pieces",
     image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop",
   },
   {
     name: "Bedroom",
     slug: "bedroom",
-    count: "12 Pieces",
+    count: "7 Pieces",
     image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80&fit=crop",
   },
   {
     name: "Dining Room",
     slug: "dining-room",
-    count: "14 Pieces",
+    count: "7 Pieces",
     image: "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=600&q=80&fit=crop",
   },
   {
     name: "Home Office",
     slug: "home-office",
-    count: "9 Pieces",
+    count: "6 Pieces",
     image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=600&q=80&fit=crop",
   },
   {
     name: "Storage",
     slug: "storage",
-    count: "11 Pieces",
+    count: "6 Pieces",
     image: "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=600&q=80&fit=crop",
   },
 ];

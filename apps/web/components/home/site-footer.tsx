@@ -10,18 +10,18 @@ const footerLinks = {
     { href: "/products?category=home-office", label: "Storage" },
   ],
   company: [
-    { href: "#about", label: "About Us" },
-    { href: "#about", label: "Our Story" },
-    { href: "#about", label: "Sustainability" },
-    { href: "#about", label: "Careers" },
-    { href: "#about", label: "Press" },
+    { href: "/products", label: "About Us" },
+    { href: "/products?featured=true", label: "Our Story" },
+    { href: "/products?featured=true", label: "Sustainability" },
+    { href: "/products", label: "Collections" },
+    { href: "/products", label: "Lookbook" },
   ],
   service: [
-    { href: "#contact", label: "Contact Us" },
-    { href: "#contact", label: "Shipping & Delivery" },
-    { href: "#contact", label: "Returns & Refunds" },
-    { href: "#contact", label: "FAQs" },
+    { href: "mailto:hello@urbannest.com", label: "Contact Us" },
     { href: "/orders", label: "Track Order" },
+    { href: "/profile", label: "My Account" },
+    { href: "/orders", label: "Returns & Exchanges" },
+    { href: "/products", label: "Design Advice" },
   ],
 };
 

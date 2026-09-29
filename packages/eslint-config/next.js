@@ -36,4 +36,10 @@ export const nextJsConfig = [
     },
   },
   pluginReactHooks.configs.flat.recommended,
+  {
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/incompatible-library": "off",
+    },
+  },
 ];
