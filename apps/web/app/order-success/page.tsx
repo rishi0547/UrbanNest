@@ -5,8 +5,12 @@ import { StorefrontNav } from "@/components/storefront-nav";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Order Confirmed | UrbanNest Design Studio",
+  title: "Order Confirmed",
   description: "Thank you for your order. Your luxury furniture acquisition has been registered.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 interface OrderSuccessPageProps {

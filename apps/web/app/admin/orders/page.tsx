@@ -10,8 +10,12 @@ import { createClient } from "@/lib/supabase/server";
 import { AdminOrdersTable } from "@/features/orders/components/admin-orders-table";
 
 export const metadata: Metadata = {
-  title: "Order Fulfillment Pipeline | UrbanNest Admin",
+  title: "Order Fulfillment Pipeline",
   description: "Executive control panel for customer purchase orders, shipping lifecycles, and delivery statuses.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export const dynamic = "force-dynamic";

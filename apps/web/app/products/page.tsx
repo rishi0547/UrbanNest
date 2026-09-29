@@ -15,9 +15,35 @@ import { CatalogShowcaseSection } from "@/features/products/catalog/components/c
 import { InspirationShowcase } from "@/features/products/catalog/components/inspiration-showcase";
 
 export const metadata: Metadata = {
-  title: "Architectural Living Catalog | UrbanNest Luxury Living",
+  title: "Architectural Living Catalog",
   description:
     "Explore handcrafted Scandinavian and Japanese modern furniture. Solid hardwoods, organic textiles, and timeless silhouettes for inspired living spaces.",
+  alternates: {
+    canonical: "/products",
+  },
+  openGraph: {
+    title: "Architectural Living Catalog | UrbanNest",
+    description:
+      "Explore handcrafted Scandinavian and Japanese modern furniture. Solid hardwoods, organic textiles, and timeless silhouettes for inspired living spaces.",
+    url: "/products",
+    type: "website",
+    siteName: "UrbanNest",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1200&q=85&fit=crop",
+        width: 1200,
+        height: 800,
+        alt: "UrbanNest Handcrafted Furniture Collection",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Architectural Living Catalog | UrbanNest",
+    description:
+      "Explore handcrafted Scandinavian and Japanese modern furniture. Solid hardwoods, organic textiles, and timeless silhouettes.",
+    images: ["https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1200&q=85&fit=crop"],
+  },
 };
 
 export const dynamic = "force-dynamic";

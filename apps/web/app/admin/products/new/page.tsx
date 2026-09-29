@@ -6,8 +6,12 @@ import { createClient } from "@/lib/supabase/server"
 import { ProductForm } from "@/features/products/components/product-form"
 
 export const metadata: Metadata = {
-  title: "Add New Product | UrbanNest Admin",
-  description: "Create a new handcrafted furniture product in your catalog",
+  title: "Add New Product",
+  description: "Create a new handcrafted furniture product in your catalog.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 export default async function NewProductPage() {

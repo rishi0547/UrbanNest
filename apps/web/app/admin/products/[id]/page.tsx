@@ -21,8 +21,12 @@ export async function generateMetadata({ params }: EditProductPageProps): Promis
     .single()
 
   return {
-    title: product ? `Edit ${product.title} | UrbanNest Admin` : "Edit Product | UrbanNest Admin",
-    description: "Modify product specifications, pricing, inventory, and imagery",
+    title: product ? `Edit Product (${product.title})` : "Edit Product",
+    description: "Modify product specifications, pricing, inventory, and imagery.",
+    robots: {
+      index: false,
+      follow: false,
+    },
   }
 }
 

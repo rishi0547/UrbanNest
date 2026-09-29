@@ -3,9 +3,13 @@ import { CartView } from "@/features/cart/components/cart-view";
 import { StorefrontNav } from "@/components/storefront-nav";
 
 export const metadata: Metadata = {
-  title: "Shopping Cart | UrbanNest Design Studio",
+  title: "Shopping Cart",
   description:
     "Review your selected handcrafted modern furniture pieces, adjust quantities, and calculate white-glove delivery.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export const dynamic = "force-dynamic";

@@ -3,8 +3,12 @@ import { Suspense } from "react";
 import { LoginForm } from "@/features/auth/components/login-form";
 
 export const metadata: Metadata = {
-  title: "Sign In | UrbanNest",
+  title: "Sign In",
   description: "Sign in to your UrbanNest customer account",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function LoginPage() {

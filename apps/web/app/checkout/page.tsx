@@ -4,8 +4,12 @@ import { StorefrontNav } from "@/components/storefront-nav";
 import { CheckoutForm } from "@/features/orders/components/checkout-form";
 
 export const metadata: Metadata = {
-  title: "Checkout | UrbanNest Design Studio",
+  title: "Checkout",
   description: "Complete your white-glove furniture delivery order with secure atomic verification.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export const dynamic = "force-dynamic";

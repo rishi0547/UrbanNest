@@ -18,8 +18,12 @@ import { formatINR } from "@/utils/currency"
 import { SafeProductImage } from "@/components/ProductImageFallback"
 
 export const metadata: Metadata = {
-  title: "Product Catalog | UrbanNest Admin",
-  description: "Manage catalog inventory, pricing, stock levels, and publication status",
+  title: "Product Catalog Management",
+  description: "Manage catalog inventory, pricing, stock levels, and publication status.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 interface ProductRecord {

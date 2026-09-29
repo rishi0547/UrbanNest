@@ -10,8 +10,12 @@ import { StorefrontNav } from "@/components/storefront-nav";
 import { UserOrdersView } from "@/features/orders/components/user-orders-view";
 
 export const metadata: Metadata = {
-  title: "My Orders | UrbanNest Design Studio",
+  title: "My Orders",
   description: "Review your handcrafted furniture order history, receipt breakdowns, and live fulfillment statuses.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export const dynamic = "force-dynamic";

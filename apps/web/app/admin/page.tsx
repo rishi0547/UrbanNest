@@ -22,8 +22,12 @@ import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/currency";
 
 export const metadata: Metadata = {
-  title: "Admin Executive Dashboard | UrbanNest",
+  title: "Admin Executive Dashboard",
   description: "Executive control panel for UrbanNest catalog, logistics, and revenue.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export const dynamic = "force-dynamic";

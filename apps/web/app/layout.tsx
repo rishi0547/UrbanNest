@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { QueryProvider } from "@/providers/query-provider";
+import { siteConfig } from "@/lib/site-config";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -17,10 +18,63 @@ const inter = Inter({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#F8F6F2",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
-  title: "UrbanNest | Premium Furniture & Home Decor",
-  description:
-    "Timeless furniture crafted for contemporary living. Premium materials, thoughtful design, unmatched comfort for every space in your home.",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: "UrbanNest | Handcrafted Modern Furniture & Architectural Living",
+    template: "%s | UrbanNest",
+  },
+  description: siteConfig.description,
+  applicationName: siteConfig.name,
+  authors: [{ name: siteConfig.creator }],
+  creator: siteConfig.creator,
+  publisher: siteConfig.publisher,
+  keywords: siteConfig.keywords,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    title: "UrbanNest | Handcrafted Modern Furniture & Architectural Living",
+    description: siteConfig.description,
+    images: [
+      {
+        url: siteConfig.ogImage,
+        width: 1200,
+        height: 800,
+        alt: "UrbanNest Handcrafted Modern Living",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "UrbanNest | Handcrafted Modern Furniture & Architectural Living",
+    description: siteConfig.description,
+    images: [siteConfig.ogImage],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

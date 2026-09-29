@@ -8,6 +8,8 @@ import { ProductDetailsView } from "@/features/products/catalog/components/produ
 import { StorefrontNav } from "@/components/storefront-nav";
 import { SiteFooter } from "@/components/home/site-footer";
 
+import { siteConfig } from "@/lib/site-config";
+
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -20,20 +22,46 @@ export async function generateMetadata({
 
   if (!product) {
     return {
-      title: "Product Not Found | UrbanNest",
-      description: "The requested furniture piece could not be located.",
+      title: "Piece Not Found",
+      description: "The requested architectural living piece could not be located in our catalog archive.",
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 
-  const thumbnail = product.images?.[0];
+  const title = product.title;
+  const description =
+    product.description?.slice(0, 160) ||
+    `Handcrafted ${product.title} in premium natural finishes. Designed for architectural comfort and contemporary living.`;
+  const thumbnail = product.images?.[0] || siteConfig.ogImage;
+  const canonicalUrl = `/products/${product.slug}`;
 
   return {
-    title: `${product.title} | UrbanNest Luxury Living`,
-    description: product.description.slice(0, 160),
+    title: title,
+    description: description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
-      title: `${product.title} | UrbanNest`,
-      description: product.description.slice(0, 160),
-      images: thumbnail ? [{ url: thumbnail }] : [],
+      title: `${title} | UrbanNest`,
+      description: description,
+      url: canonicalUrl,
+      type: "website",
+      siteName: "UrbanNest",
+      images: [
+        {
+          url: thumbnail,
+          alt: `${title} - UrbanNest Handcrafted Furniture`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | UrbanNest`,
+      description: description,
+      images: [thumbnail],
     },
   };
 }
@@ -64,8 +92,37 @@ export default async function ProductDetailPage({
     queryFn: () => getRelatedProducts(slug, product.category_id, 4),
   });
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.title,
+    description: product.description,
+    image: product.images && product.images.length > 0 ? product.images : [siteConfig.ogImage],
+    category: product.category?.name,
+    brand: {
+      "@type": "Brand",
+      name: "UrbanNest",
+    },
+    offers: {
+      "@type": "Offer",
+      price: product.price,
+      priceCurrency: "INR",
+      availability:
+        product.stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      url: `${siteConfig.url.replace(/\/+$/, "")}/products/${product.slug}`,
+    },
+  };
+
   return (
     <div className="flex flex-col bg-[#F8F6F2]">
+      {/* Schema.org Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+
       <StorefrontNav />
 
       <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-10 pb-0">

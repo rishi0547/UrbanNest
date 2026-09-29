@@ -4,8 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import { ProfileView } from "@/features/profile/components/profile-view";
 
 export const metadata: Metadata = {
-  title: "My Profile | UrbanNest Luxury Living",
-  description: "Manage your UrbanNest account, view orders, and edit your profile details",
+  title: "My Profile",
+  description: "Manage your UrbanNest account, view orders, and edit your profile details.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export const dynamic = "force-dynamic";
