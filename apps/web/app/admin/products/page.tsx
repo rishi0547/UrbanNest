@@ -98,8 +98,8 @@ export default async function AdminProductsPage() {
           </p>
         </div>
 
-        <Link href="/admin/products/new">
-          <Button className="font-semibold shadow-xs">
+        <Link href="/admin/products/new" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto font-semibold shadow-xs min-h-[40px]">
             <Plus className="size-4 mr-1.5" />
             Add Product
           </Button>
@@ -161,7 +161,7 @@ export default async function AdminProductsPage() {
       ) : (
         <Card className="border-border overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full min-w-[640px] text-left text-sm">
               <thead className="bg-muted/40 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                 <tr>
                   <th className="py-3 px-4">Product</th>

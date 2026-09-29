@@ -136,8 +136,8 @@ export function UserOrdersView() {
                 {/* Order Body */}
                 <CardContent className="p-5 space-y-4">
                   {/* Delivery destination snippet */}
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center gap-2 truncate">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2 truncate max-w-full">
                       <MapPin className="size-3.5 text-primary shrink-0" />
                       <span className="truncate">
                         Delivering to:{" "}
@@ -148,7 +148,7 @@ export function UserOrdersView() {
 
                     <Link
                       href={`/orders/${order.id}`}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline shrink-0 ml-4"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline shrink-0"
                     >
                       <span>View Details</span>
                       <ArrowRight className="size-3.5" />

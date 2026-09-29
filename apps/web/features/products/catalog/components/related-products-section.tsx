@@ -90,7 +90,7 @@ export function RelatedProductsSection({ currentProduct }: RelatedProductsSectio
       </div>
 
       {/* 4 Cards Grid matching homepage cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+      <div className="grid grid-cols-1 min-[440px]:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 items-stretch">
         {displayProducts.map((item) => (
           <div
             key={item.id}
@@ -112,14 +112,14 @@ export function RelatedProductsSection({ currentProduct }: RelatedProductsSectio
               {/* Wishlist Button */}
               <button
                 type="button"
-                className="absolute top-3 right-3 z-10 size-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-[#6B7280] hover:text-rose-600 transition-colors shadow-2xs cursor-pointer"
+                className="absolute top-3 right-3 z-10 size-9 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-[#6B7280] hover:text-rose-600 transition-colors shadow-2xs cursor-pointer"
                 title="Add to wishlist"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                 }}
               >
-                <Heart className="size-3.5 stroke-[1.75]" />
+                <Heart className="size-4 stroke-[1.75]" />
               </button>
             </Link>
 

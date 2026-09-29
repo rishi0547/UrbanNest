@@ -168,11 +168,11 @@ export function ProfileView({ user, profile, ordersSummary }: ProfileViewProps) 
         )}
 
         {/* Profile Header Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-[#E5E2DC] bg-white p-6 sm:p-8 shadow-xs">
+        <div className="relative overflow-hidden rounded-2xl border border-[#E5E2DC] bg-white p-5 sm:p-8 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
+            <div className="flex flex-col min-[480px]:flex-row items-start min-[480px]:items-center gap-4 sm:gap-5">
               {/* User Avatar with Image or Luxury Monogram */}
-              <div className="relative flex size-20 shrink-0 items-center justify-center rounded-2xl bg-[#5D6B4D]/10 border border-[#5D6B4D]/20 text-[#5D6B4D] font-heading text-2xl font-bold tracking-tight shadow-inner overflow-hidden">
+              <div className="relative flex size-16 sm:size-20 shrink-0 items-center justify-center rounded-2xl bg-[#5D6B4D]/10 border border-[#5D6B4D]/20 text-[#5D6B4D] font-heading text-xl sm:text-2xl font-bold tracking-tight shadow-inner overflow-hidden">
                 {avatarUrl && !avatarError ? (
                   <Image
                     src={avatarUrl}
@@ -187,9 +187,9 @@ export function ProfileView({ user, profile, ordersSummary }: ProfileViewProps) 
                 )}
               </div>
 
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-[#1A1A1A]">
+              <div className="space-y-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="font-heading text-xl sm:text-3xl font-bold tracking-tight text-[#1A1A1A] break-words">
                     {fullName}
                   </h1>
                   {isAdmin ? (
@@ -204,25 +204,25 @@ export function ProfileView({ user, profile, ordersSummary }: ProfileViewProps) 
                     </span>
                   )}
                 </div>
-                <p className="flex items-center gap-1.5 text-xs sm:text-sm text-[#6B7280]">
-                  <Mail className="size-3.5 text-[#5D6B4D]" />
-                  <span>{profile.email}</span>
+                <p className="flex items-center gap-1.5 text-xs sm:text-sm text-[#6B7280] truncate">
+                  <Mail className="size-3.5 text-[#5D6B4D] shrink-0" />
+                  <span className="truncate">{profile.email}</span>
                 </p>
                 <p className="flex items-center gap-1.5 text-xs text-[#8A8F98]">
-                  <Calendar className="size-3 text-[#5D6B4D]" />
+                  <Calendar className="size-3 text-[#5D6B4D] shrink-0" />
                   <span>Member since {memberSince}</span>
                 </p>
               </div>
             </div>
 
-            <div className="sm:self-center">
+            <div className="sm:self-center w-full sm:w-auto">
               <Button
                 variant={isEditing ? "secondary" : "outline"}
                 onClick={() => {
                   setIsEditing(!isEditing);
                   setStatusMessage(null);
                 }}
-                className="rounded-full border-[#E5E2DC] text-xs font-semibold flex items-center gap-1.5"
+                className="w-full sm:w-auto rounded-full border-[#E5E2DC] text-xs font-semibold flex items-center justify-center gap-1.5 min-h-[40px]"
               >
                 <Edit3 className="size-3.5" />
                 {isEditing ? "Close Editor" : "Edit Profile"}
@@ -316,20 +316,20 @@ export function ProfileView({ user, profile, ordersSummary }: ProfileViewProps) 
               )}
 
               {/* Form Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-2">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleCancel}
                   disabled={isSaving}
-                  className="rounded-full border-[#E5E2DC] text-xs font-semibold px-4"
+                  className="w-full sm:w-auto min-h-[40px] rounded-full border-[#E5E2DC] text-xs font-semibold px-4"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSaving}
-                  className="rounded-full bg-[#1A1A1A] hover:bg-[#333333] text-white text-xs font-semibold px-6 flex items-center gap-2"
+                  className="w-full sm:w-auto min-h-[40px] rounded-full bg-[#1A1A1A] hover:bg-[#333333] text-white text-xs font-semibold px-6 flex items-center justify-center gap-2"
                 >
                   {isSaving ? (
                     <>
@@ -470,7 +470,7 @@ export function ProfileView({ user, profile, ordersSummary }: ProfileViewProps) 
 
             <LogoutButton
               variant="outline"
-              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-full px-5 text-xs font-semibold ml-auto"
+              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-full px-5 text-xs font-semibold sm:ml-auto"
             />
           </div>
         </div>

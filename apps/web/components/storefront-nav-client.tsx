@@ -23,10 +23,21 @@ export function StorefrontNavClient({ user, isAdmin }: StorefrontNavClientProps)
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Close mobile menu automatically on route change
+  // Close mobile menu automatically on route change and restore scroll
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
+
+  // Lock body scroll when mobile menu drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [mobileMenuOpen]);
 
   const navLinks = [
     {
@@ -52,7 +63,7 @@ export function StorefrontNavClient({ user, isAdmin }: StorefrontNavClientProps)
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[#F8F6F2]/95 backdrop-blur-md border-b border-[#E5E2DC]/80 transition-colors">
-      <div className="mx-auto flex h-20 max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-20 max-w-[1280px] items-center justify-between px-3.5 sm:px-6 lg:px-8">
         {/* Brand Logo */}
         <Link href="/" className="flex flex-col group shrink-0">
           <span className="font-heading text-2xl sm:text-[26px] font-bold tracking-tight text-[#1A1A1A]">
@@ -111,10 +122,10 @@ export function StorefrontNavClient({ user, isAdmin }: StorefrontNavClientProps)
         </nav>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-0.5 sm:gap-1.5">
           <Link
             href="/products"
-            className="inline-flex items-center justify-center size-10 rounded-full text-[#1A1A1A] hover:bg-white/80 transition-colors"
+            className="inline-flex items-center justify-center size-10 min-w-[40px] min-h-[40px] rounded-full text-[#1A1A1A] hover:bg-white/80 transition-colors"
             title="Search catalog"
           >
             <Search className="size-[18px] stroke-[1.6]" />
@@ -124,7 +135,7 @@ export function StorefrontNavClient({ user, isAdmin }: StorefrontNavClientProps)
           {user ? (
             <Link
               href="/profile"
-              className={`inline-flex items-center justify-center size-10 rounded-full transition-colors ${
+              className={`inline-flex items-center justify-center size-10 min-w-[40px] min-h-[40px] rounded-full transition-colors ${
                 isProfileActive
                   ? "bg-white text-[#5D6B4D] border border-[#E5E2DC] shadow-xs"
                   : "text-[#1A1A1A] hover:bg-white/80"
@@ -137,7 +148,7 @@ export function StorefrontNavClient({ user, isAdmin }: StorefrontNavClientProps)
           ) : (
             <Link
               href="/login"
-              className="inline-flex items-center justify-center size-10 rounded-full text-[#1A1A1A] hover:bg-white/80 transition-colors"
+              className="inline-flex items-center justify-center size-10 min-w-[40px] min-h-[40px] rounded-full text-[#1A1A1A] hover:bg-white/80 transition-colors"
               title="Sign In"
             >
               <User className="size-[18px] stroke-[1.6]" />
@@ -145,7 +156,7 @@ export function StorefrontNavClient({ user, isAdmin }: StorefrontNavClientProps)
             </Link>
           )}
 
-          <div className="pl-1">
+          <div className="pl-0.5 sm:pl-1">
             <CartBadge />
           </div>
 
@@ -153,7 +164,7 @@ export function StorefrontNavClient({ user, isAdmin }: StorefrontNavClientProps)
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden inline-flex items-center justify-center size-10 rounded-full text-[#1A1A1A] hover:bg-white/80 transition-colors ml-1"
+            className="lg:hidden inline-flex items-center justify-center size-10 min-w-[44px] min-h-[44px] rounded-full text-[#1A1A1A] hover:bg-white/80 transition-colors ml-0.5"
             aria-label="Toggle navigation menu"
             aria-expanded={mobileMenuOpen}
           >
@@ -168,13 +179,25 @@ export function StorefrontNavClient({ user, isAdmin }: StorefrontNavClientProps)
 
       {/* Mobile Drawer / Dropdown */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-[#E5E2DC] bg-[#F8F6F2] px-4 pt-3 pb-6 space-y-2 animate-in slide-in-from-top-2 duration-200">
-          <div className="flex flex-col space-y-1">
+        <div className="lg:hidden border-t border-[#E5E2DC] bg-[#F8F6F2] px-4 pt-3 pb-8 space-y-2 animate-in slide-in-from-top-2 duration-200 max-h-[calc(100vh-5rem)] overflow-y-auto">
+          <div className="flex flex-col space-y-1.5">
+            {/* Quick Search option in mobile drawer */}
+            <Link
+              href="/products"
+              className="px-4 py-3 rounded-xl text-sm font-medium text-[#6B7280] hover:text-[#1A1A1A] hover:bg-white/60 transition-colors flex items-center justify-between min-h-[44px]"
+            >
+              <div className="flex items-center gap-2.5">
+                <Search className="size-4 text-[#5D6B4D]" />
+                <span>Search Catalog</span>
+              </div>
+              <ArrowRight className="size-4 text-[#6B7280]/60" />
+            </Link>
+
             {navLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className={`px-4 py-2.5 rounded-xl text-sm transition-colors flex items-center justify-between ${
+                className={`px-4 py-3 rounded-xl text-sm transition-colors flex items-center justify-between min-h-[44px] ${
                   link.isActive
                     ? "bg-white font-semibold text-[#1A1A1A] shadow-2xs border border-[#E5E2DC]"
                     : "font-medium text-[#6B7280] hover:text-[#1A1A1A] hover:bg-white/60"
@@ -188,13 +211,13 @@ export function StorefrontNavClient({ user, isAdmin }: StorefrontNavClientProps)
             {user && (
               <Link
                 href="/orders"
-                className={`px-4 py-2.5 rounded-xl text-sm transition-colors flex items-center justify-between ${
+                className={`px-4 py-3 rounded-xl text-sm transition-colors flex items-center justify-between min-h-[44px] ${
                   isOrdersActive
                     ? "bg-white font-semibold text-[#1A1A1A] shadow-2xs border border-[#E5E2DC]"
                     : "font-medium text-[#6B7280] hover:text-[#1A1A1A] hover:bg-white/60"
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <Package className="size-4" />
                   <span>My Orders</span>
                 </div>
@@ -205,13 +228,13 @@ export function StorefrontNavClient({ user, isAdmin }: StorefrontNavClientProps)
             {isAdmin && (
               <Link
                 href="/admin"
-                className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center justify-between ${
+                className={`px-4 py-3 rounded-xl text-sm font-semibold transition-colors flex items-center justify-between min-h-[44px] ${
                   isAdminActive
                     ? "bg-[#5D6B4D] text-white shadow-2xs"
                     : "text-[#5D6B4D] bg-[#5D6B4D]/10 hover:bg-[#5D6B4D]/20"
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <ShieldCheck className="size-4" />
                   <span>Admin Dashboard</span>
                 </div>
@@ -223,7 +246,7 @@ export function StorefrontNavClient({ user, isAdmin }: StorefrontNavClientProps)
               {user ? (
                 <Link
                   href="/profile"
-                  className="px-4 py-2.5 rounded-xl text-sm font-medium text-[#1A1A1A] hover:bg-white/60 flex items-center gap-2"
+                  className="px-4 py-3 rounded-xl text-sm font-medium text-[#1A1A1A] hover:bg-white/60 flex items-center gap-2.5 min-h-[44px]"
                 >
                   <User className="size-4 text-muted-foreground" />
                   <span>My Profile &amp; Account</span>
@@ -231,7 +254,7 @@ export function StorefrontNavClient({ user, isAdmin }: StorefrontNavClientProps)
               ) : (
                 <Link
                   href="/login"
-                  className="px-4 py-2.5 rounded-xl text-sm font-semibold text-[#5D6B4D] bg-[#5D6B4D]/10 hover:bg-[#5D6B4D]/20 flex items-center justify-between"
+                  className="px-4 py-3 rounded-xl text-sm font-semibold text-[#5D6B4D] bg-[#5D6B4D]/10 hover:bg-[#5D6B4D]/20 flex items-center justify-between min-h-[44px]"
                 >
                   <span>Sign In / Create Account</span>
                   <ArrowRight className="size-4" />

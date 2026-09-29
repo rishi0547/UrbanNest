@@ -54,11 +54,11 @@ export function InspirationSection() {
             </div>
 
             <div className="mt-auto pt-2">
-              <Link href="/products">
+              <Link href="/products" className="w-full sm:w-auto inline-block">
                 <motion.span
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white px-6 py-3 text-xs sm:text-sm font-semibold transition-colors shadow-2xs cursor-pointer whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white px-6 py-3 text-xs sm:text-sm font-semibold transition-colors shadow-2xs cursor-pointer whitespace-nowrap w-full sm:w-auto min-h-[44px]"
                 >
                   Explore Inspiration
                   <ArrowRight className="size-3.5" />

@@ -98,7 +98,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
           onMouseEnter={() => setIsZoomed(true)}
           onMouseLeave={() => setIsZoomed(false)}
           onMouseMove={handleMouseMove}
-          className="relative aspect-[4/3] sm:aspect-[5/4] lg:aspect-[1.08/1] min-h-[440px] sm:min-h-[500px] lg:min-h-[620px] w-full rounded-2xl overflow-hidden bg-[#F0EDE8] border border-[#E5E2DC] shadow-xs cursor-crosshair select-none"
+          className="relative aspect-[4/3] sm:aspect-[5/4] lg:aspect-[1.08/1] min-h-[280px] sm:min-h-[440px] lg:min-h-[620px] w-full rounded-2xl overflow-hidden bg-[#F0EDE8] border border-[#E5E2DC] shadow-xs cursor-crosshair select-none"
         >
           {currentImage ? (
             <Image
@@ -186,10 +186,10 @@ export function ProductGallery({ product }: ProductGalleryProps) {
               e.stopPropagation();
               handlePrev();
             }}
-            className="absolute left-6 top-1/2 -translate-y-1/2 z-50 size-12 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-50 size-10 sm:size-12 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer"
             title="Previous image"
           >
-            <ChevronLeft className="size-6" />
+            <ChevronLeft className="size-5 sm:size-6" />
           </button>
 
           <button
@@ -198,10 +198,10 @@ export function ProductGallery({ product }: ProductGalleryProps) {
               e.stopPropagation();
               handleNext();
             }}
-            className="absolute right-6 top-1/2 -translate-y-1/2 z-50 size-12 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-50 size-10 sm:size-12 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer"
             title="Next image"
           >
-            <ChevronRight className="size-6" />
+            <ChevronRight className="size-5 sm:size-6" />
           </button>
 
           {/* Main Large Lightbox Image */}

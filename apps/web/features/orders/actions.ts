@@ -37,7 +37,6 @@ export async function createOrderAction(
   }
 
   const payload = parseResult.data;
-  console.log("Order Payload:", payload);
 
   const { shipping, items } = payload;
 
@@ -67,8 +66,6 @@ export async function createOrderAction(
   // 2. Validate availability and stock constraints
   for (const item of items) {
     const matchedProduct = dbProducts.find((p) => p.id === item.productId);
-    console.log("Cart Item", item);
-    console.log("Database Product", matchedProduct);
 
     if (!matchedProduct || !matchedProduct.is_published) {
       return {
@@ -117,8 +114,6 @@ export async function createOrderAction(
       postal_code: shipping.postal_code,
     },
   };
-
-  console.log("Orders Table Insert:", orderInsert);
 
   const { data: insertedOrder, error: orderError } = await supabase
     .from("orders")

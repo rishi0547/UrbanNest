@@ -76,8 +76,6 @@ export function CheckoutForm({ userEmail, defaultName = "" }: CheckoutFormProps)
 
         for (const item of items) {
           const matchedProduct = foundMap.get(item.productId);
-          console.log("Cart Item", item);
-          console.log("Database Product", matchedProduct);
 
           if (!matchedProduct || !matchedProduct.is_published) {
             missingItemIds.push(item.productId);
@@ -99,7 +97,7 @@ export function CheckoutForm({ userEmail, defaultName = "" }: CheckoutFormProps)
     return () => {
       isMounted = false;
     };
-  }, [isHydrated, items.length, removeItem]);
+  }, [isHydrated, items, removeItem]);
 
   const {
     register,
@@ -227,9 +225,9 @@ export function CheckoutForm({ userEmail, defaultName = "" }: CheckoutFormProps)
         <div className="lg:col-span-2 space-y-6">
           <Card className="border-border/70 bg-card/60 backdrop-blur-xs">
             <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <CardTitle className="text-xl">1. Shipping Details</CardTitle>
-                <Badge variant="outline" className="text-xs font-normal">
+                <Badge variant="outline" className="text-xs font-normal truncate max-w-full">
                   Signed in as {userEmail}
                 </Badge>
               </div>

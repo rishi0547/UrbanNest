@@ -83,7 +83,7 @@ export function AdminOrdersTable() {
               key={tab.value}
               type="button"
               onClick={() => setSelectedStatus(tab.value)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-all whitespace-nowrap ${
+              className={`rounded-full px-3 py-1.5 min-h-[36px] text-xs font-medium transition-all whitespace-nowrap ${
                 selectedStatus === tab.value
                   ? "bg-primary text-primary-foreground shadow-xs"
                   : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
@@ -115,7 +115,7 @@ export function AdminOrdersTable() {
       ) : (
         <Card className="border-border overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full min-w-[680px] text-left text-xs">
               <thead className="bg-muted/50 font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                 <tr>
                   <th className="py-3.5 px-4">Order ID</th>

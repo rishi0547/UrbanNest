@@ -100,8 +100,8 @@ export function OrderDetailsView({ orderId }: OrderDetailsViewProps) {
       {/* Main Order Header */}
       <div className="rounded-2xl border border-border/80 bg-card/60 backdrop-blur-xs p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1.5">
-          <div className="flex items-center gap-3">
-            <h1 className="font-mono text-2xl font-bold tracking-tight text-foreground">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-mono text-xl sm:text-2xl font-bold tracking-tight text-foreground break-all">
               {order.order_number || order.id}
             </h1>
             <OrderStatusBadge status={order.status} />

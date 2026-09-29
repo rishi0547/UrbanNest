@@ -47,11 +47,11 @@ export function FeaturedCollection({ products }: FeaturedCollectionProps) {
             </div>
 
             <div className="mt-auto pt-2">
-              <Link href="/products">
+              <Link href="/products" className="w-full sm:w-auto inline-block">
                 <motion.span
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white px-6 py-3 text-xs sm:text-sm font-semibold transition-colors shadow-2xs cursor-pointer whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white px-6 py-3 text-xs sm:text-sm font-semibold transition-colors shadow-2xs cursor-pointer whitespace-nowrap w-full sm:w-auto min-h-[44px]"
                 >
                   View All Products
                   <ArrowRight className="size-3.5" />
@@ -79,10 +79,10 @@ export function FeaturedCollection({ products }: FeaturedCollectionProps) {
             </div>
 
             {/* 4 Cards Grid - 24px gap */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            <div className="grid grid-cols-1 min-[440px]:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 items-stretch">
               {displayItems.map((item, i) => (
                 <MotionWrapper key={item.id} delay={i * 0.08} className="h-full">
-                  <div className="group bg-white rounded-2xl border border-[#E5E2DC] p-4 shadow-2xs hover:shadow-lg transition-all duration-500 flex flex-col h-full justify-between">
+                  <div className="group bg-white rounded-2xl border border-[#E5E2DC] p-3.5 sm:p-4 shadow-2xs hover:shadow-lg transition-all duration-500 flex flex-col h-full justify-between">
                     {/* Image Container with Restrained Zoom */}
                     <Link
                       href={`/products/${item.slug}`}
@@ -99,10 +99,10 @@ export function FeaturedCollection({ products }: FeaturedCollectionProps) {
                       {/* Subtle Wishlist Button */}
                       <button
                         type="button"
-                        className="absolute top-3 right-3 z-10 size-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-[#6B7280] hover:text-rose-600 transition-colors shadow-2xs"
+                        className="absolute top-2.5 right-2.5 z-10 size-9 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-[#6B7280] hover:text-rose-600 transition-colors shadow-2xs"
                         title="Add to wishlist"
                       >
-                        <Heart className="size-3.5 stroke-[1.75]" />
+                        <Heart className="size-4 stroke-[1.75]" />
                       </button>
                     </Link>
 

@@ -78,7 +78,7 @@ export default async function AdminDashboardPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             <Link href="/">
               <Button
                 variant="outline"
@@ -290,7 +290,7 @@ export default async function AdminDashboardPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm">
+              <table className="w-full min-w-[620px] text-left text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b border-[#E5E2DC] text-[11px] uppercase tracking-wider text-[#6B7280] font-semibold">
                     <th className="py-3 px-3">Order ID</th>

@@ -74,7 +74,7 @@ export function CompactFilterBar({
         </div>
 
         {/* Center: Category Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none">
+        <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none -mx-1 px-1">
           {CATEGORY_CHIPS.map((chip) => {
             const isActive = selectedCategory === chip.slug;
             return (
@@ -82,7 +82,7 @@ export function CompactFilterBar({
                 key={chip.slug}
                 type="button"
                 onClick={() => onCategoryChange(chip.slug)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[36px] ${
                   isActive
                     ? "bg-[#5D6B4D] text-white shadow-2xs"
                     : "bg-[#F8F6F2] text-[#4A4A4A] hover:bg-[#E5E2DC] hover:text-[#1A1A1A]"
@@ -95,14 +95,14 @@ export function CompactFilterBar({
         </div>
 
         {/* Right: Dropdowns & Action Controls */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 justify-end shrink-0">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 justify-start sm:justify-end w-full lg:w-auto -mx-1 px-1 scrollbar-none">
           {/* Featured Toggle */}
           <Button
             type="button"
             variant={featuredOnly ? "default" : "outline"}
             size="sm"
             onClick={() => onFeaturedChange(!featuredOnly)}
-            className={`h-9 px-3 rounded-full text-xs font-semibold gap-1.5 transition-colors cursor-pointer shrink-0 ${
+            className={`h-10 px-3.5 rounded-full text-xs font-semibold gap-1.5 transition-colors cursor-pointer shrink-0 min-h-[40px] ${
               featuredOnly
                 ? "bg-[#D4A373] hover:bg-[#C49258] text-white border-transparent"
                 : "border-[#E5E2DC] bg-white text-[#1A1A1A] hover:bg-[#F8F6F2]"
@@ -117,7 +117,7 @@ export function CompactFilterBar({
             value={priceRange}
             aria-label="Filter by Price"
             onChange={(e) => onPriceRangeChange(e.target.value)}
-            className="h-9 rounded-full border border-[#E5E2DC] bg-white px-3 text-xs font-medium text-[#1A1A1A] outline-none hover:border-[#5D6B4D]/50 transition-colors cursor-pointer shrink-0"
+            className="h-10 min-h-[40px] rounded-full border border-[#E5E2DC] bg-white px-3.5 text-xs font-medium text-[#1A1A1A] outline-none hover:border-[#5D6B4D]/50 transition-colors cursor-pointer shrink-0"
           >
             <option value="all">Price: All</option>
             <option value="under-10k">Under ₹10,000</option>
@@ -130,7 +130,7 @@ export function CompactFilterBar({
             value={materialFilter}
             aria-label="Filter by Material"
             onChange={(e) => onMaterialChange(e.target.value)}
-            className="h-9 rounded-full border border-[#E5E2DC] bg-white px-3 text-xs font-medium text-[#1A1A1A] outline-none hover:border-[#5D6B4D]/50 transition-colors cursor-pointer shrink-0"
+            className="h-10 min-h-[40px] rounded-full border border-[#E5E2DC] bg-white px-3.5 text-xs font-medium text-[#1A1A1A] outline-none hover:border-[#5D6B4D]/50 transition-colors cursor-pointer shrink-0"
           >
             <option value="all">Material: All</option>
             <option value="wood">Solid Hardwood</option>
@@ -143,7 +143,7 @@ export function CompactFilterBar({
             value={sortBy}
             aria-label="Sort products"
             onChange={(e) => onSortChange(e.target.value as CatalogFilterOptions["sortBy"])}
-            className="h-9 rounded-full border border-[#E5E2DC] bg-white px-3 text-xs font-medium text-[#1A1A1A] outline-none hover:border-[#5D6B4D]/50 transition-colors cursor-pointer shrink-0"
+            className="h-10 min-h-[40px] rounded-full border border-[#E5E2DC] bg-white px-3.5 text-xs font-medium text-[#1A1A1A] outline-none hover:border-[#5D6B4D]/50 transition-colors cursor-pointer shrink-0"
           >
             <option value="newest">Sort: Newest Arrivals</option>
             <option value="price_asc">Sort: Price (Low to High)</option>
@@ -155,7 +155,7 @@ export function CompactFilterBar({
             <button
               type="button"
               onClick={onResetFilters}
-              className="h-9 px-2.5 rounded-full text-xs text-[#6B7280] hover:text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-1 cursor-pointer shrink-0"
+              className="h-10 min-h-[40px] px-3 rounded-full text-xs text-[#6B7280] hover:text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-1 cursor-pointer shrink-0"
               title="Reset all filters"
             >
               <RotateCcw className="size-3" />

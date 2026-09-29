@@ -155,51 +155,54 @@ export function CartView() {
                     </div>
                   </div>
 
-                  {/* Quantity Stepper */}
-                  <div className="flex flex-col items-center gap-1 shrink-0">
-                    <div className="flex items-center rounded-lg border border-border bg-background">
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                        className="px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        title="Decrease quantity"
-                      >
-                        -
-                      </button>
-                      <span className="px-2.5 py-1 text-xs font-semibold text-foreground min-w-7 text-center">
-                        {item.quantity}
+                  {/* Quantity Stepper & Actions (Grouped on mobile, split on desktop) */}
+                  <div className="flex items-center justify-between w-full sm:w-auto gap-4 pt-2 sm:pt-0 border-t border-border/40 sm:border-t-0 shrink-0">
+                    {/* Quantity Stepper */}
+                    <div className="flex flex-col items-start sm:items-center gap-1">
+                      <div className="flex items-center rounded-lg border border-border bg-background">
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                          className="size-9 min-w-[36px] min-h-[36px] flex items-center justify-center text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                          title="Decrease quantity"
+                        >
+                          -
+                        </button>
+                        <span className="px-2 text-xs font-semibold text-foreground min-w-7 text-center select-none">
+                          {item.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                          disabled={isMaxStock}
+                          className="size-9 min-w-[36px] min-h-[36px] flex items-center justify-center text-sm font-semibold text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors cursor-pointer"
+                          title="Increase quantity"
+                        >
+                          +
+                        </button>
+                      </div>
+                      {isMaxStock && (
+                        <span className="text-[10px] text-amber-500 font-medium">
+                          Max stock reached
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Line Total Price & Delete Action */}
+                    <div className="flex items-center sm:flex-col sm:items-end gap-3 sm:gap-1 shrink-0">
+                      <span className="text-base font-bold text-foreground font-mono">
+                        {formatINR(item.price * item.quantity)}
                       </span>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                        disabled={isMaxStock}
-                        className="px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
-                        title="Increase quantity"
+                        onClick={() => removeItem(item.productId)}
+                        className="size-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                        title={`Remove ${item.title}`}
                       >
-                        +
+                        <Trash2 className="size-4" />
+                        <span className="sr-only">Remove item</span>
                       </button>
                     </div>
-                    {isMaxStock && (
-                      <span className="text-[10px] text-amber-500 font-medium">
-                        Max stock reached
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Line Total Price & Delete Action */}
-                  <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 shrink-0">
-                    <span className="text-base font-bold text-foreground font-mono">
-                      {formatINR(item.price * item.quantity)}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeItem(item.productId)}
-                      className="text-muted-foreground hover:text-destructive transition-colors p-1"
-                      title={`Remove ${item.title}`}
-                    >
-                      <Trash2 className="size-4" />
-                      <span className="sr-only">Remove item</span>
-                    </button>
                   </div>
                 </div>
               );

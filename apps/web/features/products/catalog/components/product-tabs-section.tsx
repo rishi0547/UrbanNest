@@ -34,9 +34,9 @@ export function ProductTabsSection({
   onTabChange,
 }: ProductTabsSectionProps) {
   return (
-    <div className="w-full bg-white rounded-3xl border border-[#E5E2DC] shadow-xs p-6 sm:p-10 lg:p-12 space-y-8">
+    <div className="w-full bg-white rounded-3xl border border-[#E5E2DC] shadow-xs p-4 sm:p-10 lg:p-12 space-y-8">
       {/* Tab Navigation Header */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-3 border-b border-[#E5E2DC] scrollbar-none">
+      <div className="flex items-center gap-2 overflow-x-auto pb-3 border-b border-[#E5E2DC] scrollbar-none -mx-1 px-1 sm:mx-0 sm:px-0">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

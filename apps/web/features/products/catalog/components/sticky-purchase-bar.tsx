@@ -55,12 +55,12 @@ export function StickyPurchaseBar({ product, selectedColorHex }: StickyPurchaseB
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E5E2DC] shadow-xl py-3 px-4 sm:px-8 transition-all animate-in slide-in-from-bottom-5 duration-300">
-      <div className="mx-auto max-w-[1440px] flex items-center justify-between gap-4">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E5E2DC] shadow-xl py-2.5 sm:py-3 px-3.5 sm:px-8 pb-[calc(0.625rem+env(safe-area-inset-bottom,0px))] transition-all animate-in slide-in-from-bottom-5 duration-300">
+      <div className="mx-auto max-w-[1440px] flex items-center justify-between gap-3 sm:gap-4">
         {/* Left Info: Thumbnail + Title + Price */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           {mainImage && (
-            <div className="relative size-12 rounded-lg overflow-hidden bg-[#F0EDE8] border border-[#E5E2DC] shrink-0 hidden sm:block">
+            <div className="relative size-10 sm:size-12 rounded-lg overflow-hidden bg-[#F0EDE8] border border-[#E5E2DC] shrink-0 hidden sm:block">
               <Image
                 src={mainImage}
                 alt={product.title}
@@ -72,7 +72,7 @@ export function StickyPurchaseBar({ product, selectedColorHex }: StickyPurchaseB
           )}
 
           <div className="min-w-0">
-            <h4 className="text-sm font-semibold text-[#1A1A1A] truncate">
+            <h4 className="text-xs sm:text-sm font-semibold text-[#1A1A1A] truncate">
               {product.title}
             </h4>
             <div className="flex items-center gap-2 text-xs text-[#6B7280]">
@@ -92,20 +92,20 @@ export function StickyPurchaseBar({ product, selectedColorHex }: StickyPurchaseB
         </div>
 
         {/* Right CTA */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <Button
             type="button"
             onClick={handleQuickAdd}
             disabled={isOutOfStock}
-            className="h-11 px-6 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white font-semibold text-sm gap-2 shadow-xs transition-colors cursor-pointer"
+            className="h-10 sm:h-11 px-4 sm:px-6 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white font-semibold text-xs sm:text-sm gap-1.5 sm:gap-2 shadow-xs transition-colors cursor-pointer"
           >
             {cartFeedback ? (
               <>
-                <Check className="size-4" /> Added to Bag
+                <Check className="size-3.5 sm:size-4" /> Added
               </>
             ) : (
               <>
-                <ShoppingBag className="size-4" /> {isOutOfStock ? "Sold Out" : "Add to Cart"}
+                <ShoppingBag className="size-3.5 sm:size-4" /> {isOutOfStock ? "Sold Out" : "Add to Cart"}
               </>
             )}
           </Button>

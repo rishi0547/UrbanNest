@@ -28,7 +28,7 @@ export function HeroSection() {
             </div>
 
             {/* Serif Heading: elegant 50px-52px desktop, 1.0 line-height, max-width ~520px */}
-            <h1 className="font-heading text-4xl sm:text-5xl lg:text-[50px] xl:text-[52px] font-normal leading-[1.0] tracking-tight text-[#1A1A1A] max-w-[520px] mb-8">
+            <h1 className="font-heading text-3xl sm:text-5xl lg:text-[50px] xl:text-[52px] font-normal leading-[1.0] tracking-tight text-[#1A1A1A] max-w-[520px] mb-8 break-words">
               <span className="block">Crafted for Comfort.</span>
               {/* Heading Line 1 → Heading Line 2: 12px gap */}
               <span className="block mt-3 italic text-[#1A1A1A]">
@@ -42,24 +42,24 @@ export function HeroSection() {
               every space in your home.
             </p>
 
-            {/* CTA Buttons: Single horizontal row, 16px gap, vertically aligned → 28px gap */}
-            <div className="flex flex-row items-center gap-4 mb-7 flex-nowrap">
-              <Link href="/products">
+            {/* CTA Buttons: Responsive stack on mobile, single row on sm+ */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-7 w-full sm:w-auto">
+              <Link href="/products" className="w-full sm:w-auto">
                 <motion.span
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center gap-2.5 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white px-8 py-4 text-sm font-semibold transition-colors shadow-2xs group cursor-pointer whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-2.5 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-semibold transition-colors shadow-2xs group cursor-pointer w-full sm:w-auto whitespace-nowrap min-h-[48px]"
                 >
                   Shop Now
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                 </motion.span>
               </Link>
 
-              <Link href="/products?featured=true">
+              <Link href="/products?featured=true" className="w-full sm:w-auto">
                 <motion.span
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center gap-2 rounded-full border border-[#E5E2DC] bg-white hover:bg-[#F0EDE8] text-[#1A1A1A] px-8 py-4 text-sm font-medium transition-colors shadow-2xs cursor-pointer whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#E5E2DC] bg-white hover:bg-[#F0EDE8] text-[#1A1A1A] px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-medium transition-colors shadow-2xs cursor-pointer w-full sm:w-auto whitespace-nowrap min-h-[48px]"
                 >
                   Explore Collections
                 </motion.span>
@@ -110,7 +110,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.5 }}
-              className="absolute bottom-5 left-5 sm:bottom-6 sm:left-6 bg-white/95 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 shadow-xl border border-[#E5E2DC] flex items-center justify-between gap-4 max-w-[280px]"
+              className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 bg-white/95 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 shadow-xl border border-[#E5E2DC] flex items-center justify-between gap-3 sm:gap-4 max-w-[calc(100%-2rem)] sm:max-w-[280px]"
             >
               <div className="flex items-center gap-3">
                 <div className="relative size-11 rounded-xl bg-[#F0EDE8] overflow-hidden shrink-0">

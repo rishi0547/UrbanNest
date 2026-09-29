@@ -95,7 +95,7 @@ export function ProductCard({ product, rating = 4.8 }: ProductCardProps) {
             e.stopPropagation();
             setIsWishlisted(!isWishlisted);
           }}
-          className={`absolute top-2.5 right-2.5 z-10 size-8 rounded-full border flex items-center justify-center transition-all cursor-pointer shadow-2xs ${
+          className={`absolute top-2.5 right-2.5 z-10 size-9 rounded-full border flex items-center justify-center transition-all cursor-pointer shadow-2xs ${
             isWishlisted
               ? "border-rose-300 bg-rose-50 text-rose-600 scale-105"
               : "border-[#E5E2DC] bg-white/90 text-[#6B7280] hover:text-[#1A1A1A] hover:bg-white"
@@ -103,7 +103,7 @@ export function ProductCard({ product, rating = 4.8 }: ProductCardProps) {
           title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart
-            className={`size-3.5 transition-all ${
+            className={`size-4 transition-all ${
               isWishlisted ? "fill-rose-600 stroke-rose-600" : "stroke-[1.75]"
             }`}
           />
@@ -132,13 +132,13 @@ export function ProductCard({ product, rating = 4.8 }: ProductCardProps) {
 
         {/* Product Title */}
         <Link href={`/products/${product.slug}`} className="block mb-1.5">
-          <h3 className="font-heading text-sm sm:text-base font-normal text-[#1A1A1A] truncate group-hover:text-[#5D6B4D] transition-colors leading-snug">
+          <h3 className="font-heading text-sm sm:text-base font-normal text-[#1A1A1A] line-clamp-2 min-h-[2.5rem] group-hover:text-[#5D6B4D] transition-colors leading-snug">
             {product.title}
           </h3>
         </Link>
 
         {/* Pricing Line */}
-        <div className="flex items-baseline gap-2 mb-3">
+        <div className="flex items-baseline flex-wrap gap-x-2 gap-y-1 mb-3">
           <span className="text-sm sm:text-base font-semibold text-[#1A1A1A]">
             {formatINR(currentPrice)}
           </span>
@@ -155,9 +155,9 @@ export function ProductCard({ product, rating = 4.8 }: ProductCardProps) {
         </div>
 
         {/* Card Footer: Stock Status & Quick Add Button */}
-        <div className="flex items-center justify-between gap-2 pt-3 border-t border-[#E5E2DC]/70 mt-auto">
+        <div className="flex items-center justify-between gap-2 pt-3 border-t border-[#E5E2DC]/70 mt-auto flex-wrap sm:flex-nowrap">
           {/* Stock Status Pill */}
-          <div>
+          <div className="shrink-0">
             {isOutOfStock ? (
               <span className="text-[11px] font-semibold text-rose-600">
                 Out of Stock
@@ -181,7 +181,7 @@ export function ProductCard({ product, rating = 4.8 }: ProductCardProps) {
             size="xs"
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className="rounded-full bg-[#F8F6F2] hover:bg-[#5D6B4D] text-[#1A1A1A] hover:text-white border border-[#E5E2DC] text-xs font-semibold px-3 py-1.5 transition-colors gap-1.5 shadow-2xs cursor-pointer"
+            className="rounded-full bg-[#F8F6F2] hover:bg-[#5D6B4D] text-[#1A1A1A] hover:text-white border border-[#E5E2DC] text-xs font-semibold px-3.5 py-2 min-h-[36px] transition-colors gap-1.5 shadow-2xs cursor-pointer shrink-0"
           >
             {isAdded ? (
               <>

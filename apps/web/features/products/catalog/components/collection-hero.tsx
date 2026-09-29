@@ -27,7 +27,7 @@ export function CollectionHero() {
             </div>
 
             {/* Heading */}
-            <h1 className="font-heading text-4xl sm:text-5xl lg:text-[52px] xl:text-[56px] font-normal leading-[1.08] tracking-tight text-[#1A1A1A]">
+            <h1 className="font-heading text-3xl sm:text-5xl lg:text-[52px] xl:text-[56px] font-normal leading-[1.08] tracking-tight text-[#1A1A1A] break-words">
               Architectural Living Catalog
             </h1>
 
@@ -38,23 +38,23 @@ export function CollectionHero() {
             </p>
 
             {/* Primary CTA Button */}
-            <div className="pt-2 flex items-center gap-4">
+            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
               <Button
                 type="button"
                 onClick={handleScrollToCatalog}
-                className="h-12 px-7 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white text-sm font-semibold transition-all shadow-xs gap-2 cursor-pointer"
+                className="h-12 px-7 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white text-sm font-semibold transition-all shadow-xs gap-2 cursor-pointer w-full sm:w-auto justify-center"
               >
                 Explore Collection
                 <ArrowDown className="size-4 animate-bounce" />
               </Button>
-              <span className="text-xs text-[#6B7280] font-light hidden sm:inline">
+              <span className="text-xs text-[#6B7280] font-light text-center sm:text-left">
                 Over 30 studio signatures
               </span>
             </div>
           </div>
 
           {/* Right Image Column (7 cols out of 12) */}
-          <div className="lg:col-span-7 relative h-[360px] sm:h-[440px] lg:h-[520px] w-full rounded-3xl overflow-hidden border border-[#E5E2DC] shadow-sm bg-[#F0EDE8]">
+          <div className="lg:col-span-7 relative h-[280px] sm:h-[440px] lg:h-[520px] w-full rounded-3xl overflow-hidden border border-[#E5E2DC] shadow-sm bg-[#F0EDE8]">
             <Image
               src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1400&q=85&fit=crop"
               alt="UrbanNest Architectural Living Catalog"
@@ -68,7 +68,7 @@ export function CollectionHero() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent pointer-events-none" />
 
             {/* Floating Luxury Detail Badge */}
-            <div className="absolute bottom-5 left-5 sm:bottom-6 sm:left-6 z-10 rounded-2xl bg-white/90 backdrop-blur-md border border-[#E5E2DC] p-3.5 sm:p-4 shadow-sm max-w-xs">
+            <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-10 rounded-2xl bg-white/90 backdrop-blur-md border border-[#E5E2DC] p-3.5 sm:p-4 shadow-sm max-w-[calc(100%-2rem)] sm:max-w-xs">
               <div className="flex items-center gap-2 mb-1">
                 <span className="size-2 rounded-full bg-emerald-600" />
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-[#5D6B4D]">

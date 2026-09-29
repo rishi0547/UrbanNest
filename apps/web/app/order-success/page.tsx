@@ -54,7 +54,7 @@ export default async function OrderSuccessPage({ searchParams }: OrderSuccessPag
           <div className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
             Order Reference
           </div>
-          <div className="mt-1 font-mono text-xl sm:text-2xl font-bold tracking-tight text-foreground select-all">
+          <div className="mt-1 font-mono text-xl sm:text-2xl font-bold tracking-tight text-foreground select-all break-all">
             {displayId}
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-relaxed">

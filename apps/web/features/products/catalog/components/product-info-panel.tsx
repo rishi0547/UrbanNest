@@ -139,7 +139,7 @@ export function ProductInfoPanel({
         </div>
 
         {/* Large Luxury Title (48-52px) */}
-        <h1 className="font-heading text-3xl sm:text-4xl lg:text-[44px] xl:text-[48px] font-normal leading-[1.08] tracking-tight text-[#1A1A1A]">
+        <h1 className="font-heading text-2xl sm:text-4xl lg:text-[44px] xl:text-[48px] font-normal leading-[1.08] tracking-tight text-[#1A1A1A] break-words">
           {product.title}
         </h1>
 
@@ -325,29 +325,49 @@ export function ProductInfoPanel({
 
       {/* 6. Quantity & Purchase Section */}
       <div className="space-y-3 pt-3 border-t border-[#E5E2DC]">
-        <div className="flex items-center gap-3">
-          {/* Quantity Selector */}
-          <div className="flex items-center rounded-full border border-[#E5E2DC] bg-white p-1 shadow-2xs shrink-0">
+        <div className="flex flex-col min-[480px]:flex-row items-stretch min-[480px]:items-center gap-3">
+          <div className="flex items-center justify-between min-[480px]:justify-start gap-3">
+            {/* Quantity Selector */}
+            <div className="flex items-center rounded-full border border-[#E5E2DC] bg-white p-1 shadow-2xs shrink-0">
+              <button
+                type="button"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={isOutOfStock || quantity <= 1}
+                className="size-10 rounded-full flex items-center justify-center text-sm font-semibold text-[#1A1A1A] hover:bg-[#F0EDE8] disabled:opacity-30 transition-colors cursor-pointer"
+                title="Decrease quantity"
+              >
+                -
+              </button>
+              <span className="w-10 text-center text-sm font-semibold text-[#1A1A1A] select-none">
+                {quantity}
+              </span>
+              <button
+                type="button"
+                onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                disabled={isOutOfStock || quantity >= product.stock}
+                className="size-10 rounded-full flex items-center justify-center text-sm font-semibold text-[#1A1A1A] hover:bg-[#F0EDE8] disabled:opacity-30 transition-colors cursor-pointer"
+                title="Increase quantity"
+              >
+                +
+              </button>
+            </div>
+
+            {/* Wishlist Button (mobile next to quantity) */}
             <button
               type="button"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              disabled={isOutOfStock || quantity <= 1}
-              className="size-10 rounded-full flex items-center justify-center text-sm font-semibold text-[#1A1A1A] hover:bg-[#F0EDE8] disabled:opacity-30 transition-colors cursor-pointer"
-              title="Decrease quantity"
+              onClick={() => setIsWishlisted(!isWishlisted)}
+              className={`min-[480px]:hidden size-12 rounded-full border flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+                isWishlisted
+                  ? "border-rose-300 bg-rose-50 text-rose-600 shadow-xs"
+                  : "border-[#E5E2DC] bg-white text-[#6B7280] hover:text-[#1A1A1A] hover:bg-[#F0EDE8]"
+              }`}
+              title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
             >
-              -
-            </button>
-            <span className="w-10 text-center text-sm font-semibold text-[#1A1A1A] select-none">
-              {quantity}
-            </span>
-            <button
-              type="button"
-              onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-              disabled={isOutOfStock || quantity >= product.stock}
-              className="size-10 rounded-full flex items-center justify-center text-sm font-semibold text-[#1A1A1A] hover:bg-[#F0EDE8] disabled:opacity-30 transition-colors cursor-pointer"
-              title="Increase quantity"
-            >
-              +
+              <Heart
+                className={`size-5 transition-transform ${
+                  isWishlisted ? "fill-rose-600 scale-110" : "stroke-[1.6]"
+                }`}
+              />
             </button>
           </div>
 
@@ -356,17 +376,17 @@ export function ProductInfoPanel({
             type="button"
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className="flex-1 h-12 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white font-semibold text-sm sm:text-base gap-2 shadow-xs transition-colors cursor-pointer"
+            className="w-full min-[480px]:flex-1 h-12 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white font-semibold text-sm sm:text-base gap-2 shadow-xs transition-colors cursor-pointer justify-center"
           >
             <ShoppingBag className="size-4" />
             {isOutOfStock ? "Sold Out" : `Add to Cart • ${formatINR(currentPrice * quantity)}`}
           </Button>
 
-          {/* Wishlist Button */}
+          {/* Wishlist Button (desktop/tablet) */}
           <button
             type="button"
             onClick={() => setIsWishlisted(!isWishlisted)}
-            className={`size-12 rounded-full border flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+            className={`hidden min-[480px]:flex size-12 rounded-full border items-center justify-center transition-all cursor-pointer shrink-0 ${
               isWishlisted
                 ? "border-rose-300 bg-rose-50 text-rose-600 shadow-xs"
                 : "border-[#E5E2DC] bg-white text-[#6B7280] hover:text-[#1A1A1A] hover:bg-[#F0EDE8]"

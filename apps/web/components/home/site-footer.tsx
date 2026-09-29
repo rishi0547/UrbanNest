@@ -167,16 +167,16 @@ export function SiteFooter() {
         </div>
 
         {/* Bottom Bar with Generous Margin */}
-        <div className="border-t border-[#E5E2DC] mt-16 lg:mt-24 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#6B7280] font-light">
+        <div className="border-t border-[#E5E2DC] mt-12 sm:mt-16 lg:mt-24 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#6B7280] font-light text-center sm:text-left">
           <p>© {new Date().getFullYear()} UrbanNest Furniture. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <Link href="#" className="hover:text-[#1A1A1A] transition-colors">
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-6 gap-y-2">
+            <Link href="#" className="hover:text-[#1A1A1A] transition-colors py-1">
               Privacy Policy
             </Link>
-            <Link href="#" className="hover:text-[#1A1A1A] transition-colors">
+            <Link href="#" className="hover:text-[#1A1A1A] transition-colors py-1">
               Terms of Service
             </Link>
-            <Link href="#" className="hover:text-[#1A1A1A] transition-colors">
+            <Link href="#" className="hover:text-[#1A1A1A] transition-colors py-1">
               Cookies Settings
             </Link>
           </div>

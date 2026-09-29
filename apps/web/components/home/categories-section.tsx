@@ -30,26 +30,26 @@ export function CategoriesSection() {
     <section className="pt-8 sm:pt-10 lg:pt-10 pb-10 sm:pb-12 lg:pb-[50px] bg-[#F8F6F2]">
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <MotionWrapper>
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-5 sm:gap-6 lg:gap-8 justify-items-center items-start">
+          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2.5 sm:gap-6 lg:gap-8 justify-items-center items-start">
             {categories.map((cat) => {
               const Icon = cat.icon;
               return (
                 <Link
                   key={cat.name}
                   href={`/products?category=${cat.slug}`}
-                  className="flex flex-col items-center group w-full max-w-[110px]"
+                  className="flex flex-col items-center group w-full max-w-[72px] min-[380px]:max-w-[85px] sm:max-w-[110px]"
                 >
-                  {/* 100px Circular Icon Container */}
+                  {/* Circular Icon Container */}
                   <motion.div
                     whileHover={{ y: -3, scale: 1.04 }}
                     transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                    className="size-[84px] sm:size-[100px] rounded-full bg-white border border-[#E5E2DC] flex items-center justify-center shadow-2xs group-hover:border-[#5D6B4D]/50 group-hover:shadow-md transition-all duration-300"
+                    className="size-[58px] min-[380px]:size-[72px] sm:size-[100px] rounded-full bg-white border border-[#E5E2DC] flex items-center justify-center shadow-2xs group-hover:border-[#5D6B4D]/50 group-hover:shadow-md transition-all duration-300"
                   >
-                    <Icon className="size-6 sm:size-7 text-[#1A1A1A]/80 group-hover:text-[#5D6B4D] stroke-[1.4] transition-colors" />
+                    <Icon className="size-5 min-[380px]:size-6 sm:size-7 text-[#1A1A1A]/80 group-hover:text-[#5D6B4D] stroke-[1.4] transition-colors" />
                   </motion.div>
 
                   {/* Label Beneath Icon */}
-                  <span className="text-xs sm:text-[13px] font-medium text-[#1A1A1A] group-hover:text-[#5D6B4D] transition-colors text-center mt-3 leading-snug">
+                  <span className="text-[10px] min-[380px]:text-xs sm:text-[13px] font-medium text-[#1A1A1A] group-hover:text-[#5D6B4D] transition-colors text-center mt-2 sm:mt-3 leading-tight line-clamp-1 sm:line-clamp-none">
                     {cat.name}
                   </span>
                 </Link>

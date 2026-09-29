@@ -163,7 +163,7 @@ export function ProductGrid({
 
       {/* Loading Skeletons */}
       {productsLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+        <div className="grid grid-cols-1 min-[440px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {Array.from({ length: 8 }).map((_, idx) => (
             <div
               key={idx}
@@ -201,8 +201,8 @@ export function ProductGrid({
           </Button>
         </div>
       ) : (
-        /* 4-Column Product Grid (Section 11: 4 desktop, 2-3 tablet, 1-2 mobile) */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 items-stretch">
+        /* 4-Column Product Grid (4 desktop, 2-3 tablet, 1-2 mobile) */
+        <div className="grid grid-cols-1 min-[440px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 items-stretch">
           {filteredProducts.map((product, idx) => (
             <ProductCard
               key={product.id || idx}
