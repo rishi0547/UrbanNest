@@ -5,19 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { registerSchema, type RegisterInput } from "../schemas";
 import { registerAction } from "../actions";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { AuthLayout } from "./auth-layout";
+import { AuthInput } from "./auth-input";
+import { PasswordInput } from "./password-input";
+import { AuthSubmitButton } from "./auth-submit-button";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -44,11 +38,11 @@ export function RegisterForm() {
     try {
       const result = await registerAction(values);
       if (!result.success) {
-        setServerError(result.error ?? "Registration failed. Please try again.");
+        setServerError(result.error ?? "Registration failed. Please check your information and try again.");
         return;
       }
       setSuccessMessage(
-        "Account created! Check your email to confirm your account or sign in directly."
+        "Account created! Welcome to UrbanNest. Redirecting to your profile..."
       );
       setTimeout(() => {
         router.push("/profile");
@@ -60,113 +54,106 @@ export function RegisterForm() {
   };
 
   return (
-    <Card className="w-full max-w-md border-border bg-card/50 backdrop-blur-sm shadow-xl">
-      <CardHeader className="space-y-2 text-center">
-        <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
-          Create an account
-        </CardTitle>
-        <CardDescription className="text-sm text-muted-foreground">
-          Join UrbanNest to curate your interior spaces and track deliveries
-        </CardDescription>
-      </CardHeader>
+    <AuthLayout
+      imageSrc="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1600&q=85&fit=crop"
+      imageAlt="UrbanNest handcrafted furniture and architectural interior design"
+      badge="MEMBER ACCESS"
+      quote="Architecture begins with the home."
+      subquote="Join our community of considered interior design and timeless craftsmanship."
+      eyebrow="URBANNEST"
+      title="Create your account"
+      description="Join UrbanNest to curate your spaces and track your orders."
+      footer={
+        <div className="w-full">
+          {/* Subtle Divider (26–32px from CTA) */}
+          <div className="w-full border-t border-[#E5E2DC] my-7 sm:my-8" />
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CardContent className="space-y-4">
-          {serverError && (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
-              {serverError}
-            </div>
-          )}
-
-          {successMessage && (
-            <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-xs text-foreground">
-              {successMessage}
-            </div>
-          )}
-
-          <div className="space-y-1.5">
-            <Label htmlFor="fullName">Full Name</Label>
-            <Input
-              id="fullName"
-              type="text"
-              placeholder="Eleanor Vance"
-              autoComplete="name"
-              disabled={isSubmitting}
-              {...register("fullName")}
-            />
-            {errors.fullName && (
-              <p className="text-xs text-destructive">{errors.fullName.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              disabled={isSubmitting}
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-xs text-destructive">{errors.email.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="new-password"
-              disabled={isSubmitting}
-              {...register("password")}
-            />
-            {errors.password && (
-              <p className="text-xs text-destructive">{errors.password.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="new-password"
-              disabled={isSubmitting}
-              {...register("confirmPassword")}
-            />
-            {errors.confirmPassword && (
-              <p className="text-xs text-destructive">
-                {errors.confirmPassword.message}
-              </p>
-            )}
-          </div>
-        </CardContent>
-
-        <CardFooter className="flex flex-col space-y-4">
-          <Button
-            type="submit"
-            className="w-full font-medium"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Creating account..." : "Sign Up"}
-          </Button>
-
-          <p className="text-center text-xs text-muted-foreground">
+          {/* Alternate Auth Link (24–28px below divider) */}
+          <p className="text-center text-xs sm:text-sm text-[#6B7280]">
             Already have an account?{" "}
             <Link
               href="/login"
-              className="font-medium text-foreground underline underline-offset-4 hover:text-primary transition-colors"
+              className="font-medium text-[#1A1A1A] underline underline-offset-4 hover:text-[#5D6B4D] transition-colors"
             >
               Sign In
             </Link>
           </p>
-        </CardFooter>
+        </div>
+      }
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-5 sm:space-y-6">
+        {serverError && (
+          <div
+            role="alert"
+            className="rounded-xl border border-red-200 bg-red-50/90 p-4 text-xs sm:text-sm text-red-800 flex items-start gap-3 transition-all"
+          >
+            <AlertCircle className="size-4.5 shrink-0 text-red-600 mt-0.5" />
+            <span className="leading-relaxed">{serverError}</span>
+          </div>
+        )}
+
+        {successMessage && (
+          <div
+            role="status"
+            className="rounded-xl border border-[#5D6B4D]/30 bg-[#5D6B4D]/10 p-4 text-xs sm:text-sm text-[#1A1A1A] flex items-start gap-3 transition-all"
+          >
+            <CheckCircle2 className="size-4.5 shrink-0 text-[#5D6B4D] mt-0.5" />
+            <span className="leading-relaxed font-medium">{successMessage}</span>
+          </div>
+        )}
+
+        <AuthInput
+          id="register-fullname"
+          label="Full Name"
+          type="text"
+          placeholder="Eleanor Vance"
+          autoComplete="name"
+          disabled={isSubmitting}
+          error={errors.fullName?.message}
+          {...register("fullName")}
+        />
+
+        <AuthInput
+          id="register-email"
+          label="Email Address"
+          type="email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          disabled={isSubmitting}
+          error={errors.email?.message}
+          {...register("email")}
+        />
+
+        <PasswordInput
+          id="register-password"
+          label="Password"
+          placeholder="••••••••"
+          autoComplete="new-password"
+          disabled={isSubmitting}
+          error={errors.password?.message}
+          {...register("password")}
+        />
+
+        <PasswordInput
+          id="register-confirm-password"
+          label="Confirm Password"
+          placeholder="••••••••"
+          autoComplete="new-password"
+          disabled={isSubmitting}
+          error={errors.confirmPassword?.message}
+          {...register("confirmPassword")}
+        />
+
+        {/* Last field → CTA: 28–32px */}
+        <div className="pt-3 sm:pt-4">
+          <AuthSubmitButton
+            isSubmitting={isSubmitting}
+            submittingText="Creating account..."
+          >
+            Create Account
+          </AuthSubmitButton>
+        </div>
       </form>
-    </Card>
+    </AuthLayout>
   );
 }

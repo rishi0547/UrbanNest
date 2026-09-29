@@ -5,19 +5,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle } from "lucide-react";
 import { loginSchema, type LoginInput } from "../schemas";
 import { loginAction } from "../actions";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { AuthLayout } from "./auth-layout";
+import { AuthInput } from "./auth-input";
+import { PasswordInput } from "./password-input";
+import { AuthSubmitButton } from "./auth-submit-button";
 
 export function LoginForm() {
   const router = useRouter();
@@ -42,7 +36,7 @@ export function LoginForm() {
     try {
       const result = await loginAction(values);
       if (!result.success) {
-        setServerError(result.error ?? "Authentication failed. Please try again.");
+        setServerError(result.error ?? "Authentication failed. Please verify your credentials.");
         return;
       }
       router.push(redirectTo);
@@ -53,77 +47,75 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md border-border bg-card/50 backdrop-blur-sm shadow-xl">
-      <CardHeader className="space-y-2 text-center">
-        <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
-          Welcome back
-        </CardTitle>
-        <CardDescription className="text-sm text-muted-foreground">
-          Sign in to your UrbanNest account to view orders and saved designs
-        </CardDescription>
-      </CardHeader>
+    <AuthLayout
+      imageSrc="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1600&q=85&fit=crop"
+      imageAlt="UrbanNest architectural living room with handcrafted minimalist furniture"
+      badge="ATELIER COLLECTION"
+      quote="Designed for the way you live."
+      subquote="Curated pieces for considered spaces."
+      eyebrow="URBANNEST"
+      title="Welcome back"
+      description="Sign in to continue your UrbanNest experience."
+      footer={
+        <div className="w-full">
+          {/* Subtle Divider (26–32px from CTA) */}
+          <div className="w-full border-t border-[#E5E2DC] my-7 sm:my-8" />
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CardContent className="space-y-4">
-          {serverError && (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
-              {serverError}
-            </div>
-          )}
-
-          <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              disabled={isSubmitting}
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-xs text-destructive">{errors.email.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-            </div>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="current-password"
-              disabled={isSubmitting}
-              {...register("password")}
-            />
-            {errors.password && (
-              <p className="text-xs text-destructive">{errors.password.message}</p>
-            )}
-          </div>
-        </CardContent>
-
-        <CardFooter className="flex flex-col space-y-4">
-          <Button
-            type="submit"
-            className="w-full font-medium"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Signing in..." : "Sign In"}
-          </Button>
-
-          <p className="text-center text-xs text-muted-foreground">
+          {/* Alternate Auth Link (24–28px below divider) */}
+          <p className="text-center text-xs sm:text-sm text-[#6B7280]">
             Don&apos;t have an account?{" "}
             <Link
               href="/register"
-              className="font-medium text-foreground underline underline-offset-4 hover:text-primary transition-colors"
+              className="font-medium text-[#1A1A1A] underline underline-offset-4 hover:text-[#5D6B4D] transition-colors"
             >
               Create an account
             </Link>
           </p>
-        </CardFooter>
+        </div>
+      }
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-5 sm:space-y-6">
+        {serverError && (
+          <div
+            role="alert"
+            className="rounded-xl border border-red-200 bg-red-50/90 p-4 text-xs sm:text-sm text-red-800 flex items-start gap-3 transition-all"
+          >
+            <AlertCircle className="size-4.5 shrink-0 text-red-600 mt-0.5" />
+            <span className="leading-relaxed">{serverError}</span>
+          </div>
+        )}
+
+        <AuthInput
+          id="login-email"
+          label="Email Address"
+          type="email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          disabled={isSubmitting}
+          error={errors.email?.message}
+          {...register("email")}
+        />
+
+        <PasswordInput
+          id="login-password"
+          label="Password"
+          placeholder="••••••••"
+          autoComplete="current-password"
+          disabled={isSubmitting}
+          error={errors.password?.message}
+          {...register("password")}
+        />
+
+        {/* Last field → CTA: 28–32px */}
+        <div className="pt-3 sm:pt-4">
+          <AuthSubmitButton
+            isSubmitting={isSubmitting}
+            submittingText="Signing in..."
+          >
+            Sign In
+          </AuthSubmitButton>
+        </div>
       </form>
-    </Card>
+    </AuthLayout>
   );
 }
