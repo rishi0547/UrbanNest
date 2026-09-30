@@ -1,37 +1,41 @@
 "use client";
 
+import React, { useMemo, Suspense } from "react";
+import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { ArrowRight } from "lucide-react";
+import { useProducts } from "../queries";
 
 export const SPACES = [
   {
     name: "Living Room",
     slug: "living-room",
-    count: "8 Pieces",
+    fallbackCount: 8,
     image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop",
   },
   {
     name: "Bedroom",
     slug: "bedroom",
-    count: "7 Pieces",
+    fallbackCount: 7,
     image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80&fit=crop",
   },
   {
     name: "Dining Room",
     slug: "dining-room",
-    count: "7 Pieces",
+    fallbackCount: 7,
     image: "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=600&q=80&fit=crop",
   },
   {
     name: "Home Office",
     slug: "home-office",
-    count: "6 Pieces",
+    fallbackCount: 6,
     image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=600&q=80&fit=crop",
   },
   {
     name: "Storage",
     slug: "storage",
-    count: "6 Pieces",
+    fallbackCount: 6,
     image: "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=600&q=80&fit=crop",
   },
 ];
@@ -41,17 +45,34 @@ interface ShopBySpaceProps {
   onSelectCategory?: (slug: string) => void;
 }
 
-export function ShopBySpace({
-  selectedCategory,
+function ShopBySpaceContent({
+  selectedCategory: propCategory,
   onSelectCategory,
 }: ShopBySpaceProps) {
-  const handleClick = (slug: string) => {
+  const searchParams = useSearchParams();
+  const currentCategory = propCategory || searchParams.get("category") || "all";
+
+  // Access prefetched products cache to dynamically derive live piece counts per space
+  const { data: products } = useProducts();
+
+  const spaceCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    (products || []).forEach((p) => {
+      const slug = p.category?.slug;
+      if (slug) {
+        counts[slug] = (counts[slug] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [products]);
+
+  const handleSpaceClick = (slug: string) => {
     if (onSelectCategory) {
       onSelectCategory(slug);
-      const filterSection = document.getElementById("catalog-filter-bar");
-      if (filterSection) {
-        filterSection.scrollIntoView({ behavior: "smooth" });
-      }
+    }
+    const filterSection = document.getElementById("catalog-filter-bar");
+    if (filterSection) {
+      filterSection.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -68,25 +89,29 @@ export function ShopBySpace({
               Shop By Space
             </h2>
           </div>
-          <button
-            type="button"
-            onClick={() => handleClick("all")}
-            className="text-xs font-semibold text-[#5D6B4D] hover:underline flex items-center gap-1.5 cursor-pointer"
+          <Link
+            href="/products?category=all#catalog-filter-bar"
+            onClick={() => handleSpaceClick("all")}
+            className="group inline-flex items-center gap-1.5 text-xs font-semibold text-[#5D6B4D] hover:text-[#1A1A1A] transition-colors cursor-pointer"
           >
-            View All Spaces <ArrowRight className="size-3.5" />
-          </button>
+            <span>View All Spaces</span>
+            <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+          </Link>
         </div>
 
         {/* 5 Cards Desktop / 3 Tablet / 2 Mobile */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8 justify-items-center">
           {SPACES.map((space) => {
-            const isSelected = selectedCategory === space.slug;
+            const isSelected = currentCategory === space.slug;
+            const pieceCount = spaceCounts[space.slug] ?? space.fallbackCount;
+
             return (
-              <button
+              <Link
                 key={space.slug}
-                type="button"
-                onClick={() => handleClick(space.slug)}
-                className="group flex flex-col items-center text-center cursor-pointer w-full focus:outline-none"
+                href={`/products?category=${space.slug}#catalog-filter-bar`}
+                onClick={() => handleSpaceClick(space.slug)}
+                aria-label={`Browse ${space.name} furniture (${pieceCount} pieces)`}
+                className="group flex flex-col items-center text-center cursor-pointer w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5D6B4D] focus-visible:ring-offset-4 rounded-3xl p-1.5 sm:p-2 transition-transform duration-200 hover:-translate-y-1"
               >
                 {/* Circular Image Container */}
                 <div
@@ -99,7 +124,7 @@ export function ShopBySpace({
                   <div className="relative size-full rounded-full overflow-hidden">
                     <Image
                       src={space.image}
-                      alt={space.name}
+                      alt={`${space.name} architectural living space`}
                       fill
                       unoptimized
                       sizes="(max-width: 640px) 120px, 160px"
@@ -111,23 +136,32 @@ export function ShopBySpace({
                 {/* Category Name & Count */}
                 <div className="mt-3.5">
                   <h3
-                    className={`text-sm sm:text-base font-medium transition-colors ${
+                    className={`text-sm sm:text-base font-medium transition-colors flex items-center justify-center gap-1 ${
                       isSelected
                         ? "text-[#5D6B4D] font-semibold"
                         : "text-[#1A1A1A] group-hover:text-[#5D6B4D]"
                     }`}
                   >
-                    {space.name}
+                    <span>{space.name}</span>
+                    <ArrowRight className="size-3 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 text-[#5D6B4D]" />
                   </h3>
                   <span className="text-[11px] text-[#6B7280] font-light mt-0.5 block">
-                    {space.count}
+                    {pieceCount} {pieceCount === 1 ? "Piece" : "Pieces"}
                   </span>
                 </div>
-              </button>
+              </Link>
             );
           })}
         </div>
       </div>
     </section>
+  );
+}
+
+export function ShopBySpace(props: ShopBySpaceProps) {
+  return (
+    <Suspense fallback={null}>
+      <ShopBySpaceContent {...props} />
+    </Suspense>
   );
 }

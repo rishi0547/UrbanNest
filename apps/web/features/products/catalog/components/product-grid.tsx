@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PackageX } from "lucide-react";
 import { useProducts, useCategories } from "../queries";
 import { ProductCard } from "./product-card";
@@ -13,19 +14,67 @@ interface ProductGridProps {
   onCategoryChange?: (slug: string) => void;
 }
 
-export function ProductGrid({
+function ProductGridContent({
   initialCategory = "all",
   onCategoryChange: externalOnCategoryChange,
 }: ProductGridProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [sortBy, setSortBy] = useState<CatalogFilterOptions["sortBy"]>("newest");
-  const [featuredOnly, setFeaturedOnly] = useState<boolean>(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+  const sortParam = searchParams.get("sort");
+  const featuredParam = searchParams.get("featured");
+  const searchParam = searchParams.get("search");
+
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    categoryParam || initialCategory
+  );
+  const [searchQuery, setSearchQuery] = useState<string>(searchParam || "");
+  const [sortBy, setSortBy] = useState<CatalogFilterOptions["sortBy"]>(
+    (sortParam as CatalogFilterOptions["sortBy"]) || "newest"
+  );
+  const [featuredOnly, setFeaturedOnly] = useState<boolean>(
+    featuredParam === "true"
+  );
   const [priceRange, setPriceRange] = useState<string>("all");
   const [materialFilter, setMaterialFilter] = useState<string>("all");
 
+  // Keep state synchronized whenever URL search parameters change
+  // (e.g. user clicked ShopBySpace, browser Back/Forward, or external link)
+  useEffect(() => {
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    } else {
+      setSelectedCategory("all");
+    }
+  }, [categoryParam]);
+
+  useEffect(() => {
+    if (featuredParam === "true") {
+      setFeaturedOnly(true);
+    } else if (featuredParam === "false") {
+      setFeaturedOnly(false);
+    }
+  }, [featuredParam]);
+
+  useEffect(() => {
+    if (searchParam !== null) {
+      setSearchQuery(searchParam);
+    }
+  }, [searchParam]);
+
+  useEffect(() => {
+    if (sortParam === "price_asc" || sortParam === "price_desc" || sortParam === "newest") {
+      setSortBy(sortParam);
+    }
+  }, [sortParam]);
+
   const { data: dbProducts, isLoading: productsLoading, isError } = useProducts({
-    categorySlug: selectedCategory === "all" ? undefined : selectedCategory,
+    categorySlug:
+      selectedCategory === "all" ||
+      selectedCategory === "lighting" ||
+      selectedCategory === "decor-accents"
+        ? undefined
+        : selectedCategory,
     searchQuery: searchQuery.trim() || undefined,
     sortBy,
     featuredOnly: featuredOnly ? true : undefined,
@@ -36,6 +85,14 @@ export function ProductGrid({
     if (externalOnCategoryChange) {
       externalOnCategoryChange(slug);
     }
+    const params = new URLSearchParams(searchParams.toString());
+    if (slug === "all") {
+      params.delete("category");
+    } else {
+      params.set("category", slug);
+    }
+    const query = params.toString();
+    router.replace(query ? `/products?${query}` : "/products", { scroll: false });
   };
 
   const handleResetFilters = () => {
@@ -48,6 +105,7 @@ export function ProductGrid({
     if (externalOnCategoryChange) {
       externalOnCategoryChange("all");
     }
+    router.replace("/products", { scroll: false });
   };
 
   // Filter only real products fetched from the database
@@ -58,7 +116,33 @@ export function ProductGrid({
       // 1. Category Filter
       if (selectedCategory !== "all") {
         const catSlug = item.category?.slug || "";
-        if (catSlug !== selectedCategory) return false;
+        if (selectedCategory === "lighting") {
+          const text = (item.title + " " + item.description).toLowerCase();
+          if (
+            !text.includes("lamp") &&
+            !text.includes("light") &&
+            !text.includes("sconce") &&
+            !text.includes("pendant") &&
+            catSlug !== "lighting"
+          ) {
+            return false;
+          }
+        } else if (selectedCategory === "decor-accents") {
+          const text = (item.title + " " + item.description).toLowerCase();
+          if (
+            !text.includes("vase") &&
+            !text.includes("decor") &&
+            !text.includes("ceramic") &&
+            !text.includes("mirror") &&
+            !text.includes("accent") &&
+            !text.includes("bowl") &&
+            catSlug !== "decor-accents"
+          ) {
+            return false;
+          }
+        } else {
+          if (catSlug !== selectedCategory) return false;
+        }
       }
 
       // 2. Search Query
@@ -114,6 +198,8 @@ export function ProductGrid({
   // Section Heading text
   const headingText = useMemo(() => {
     if (selectedCategory !== "all") {
+      if (selectedCategory === "lighting") return "Lighting Collection";
+      if (selectedCategory === "decor-accents") return "Decor & Accents Collection";
       return `${selectedCategory.replace("-", " ")} Collection`;
     }
     if (featuredOnly) {
@@ -156,7 +242,7 @@ export function ProductGrid({
           </p>
         </div>
 
-        <div className="text-xs text-[#6B7280]">
+        <div className="hidden sm:block text-xs text-[#6B7280]">
           Showing <strong className="text-[#1A1A1A]">{filteredProducts.length}</strong> available designs
         </div>
       </div>
@@ -213,5 +299,13 @@ export function ProductGrid({
         </div>
       )}
     </div>
+  );
+}
+
+export function ProductGrid(props: ProductGridProps) {
+  return (
+    <Suspense fallback={null}>
+      <ProductGridContent {...props} />
+    </Suspense>
   );
 }
