@@ -146,3 +146,110 @@ a {
     font-family: var(--font-heading), Georgia, serif;
   }
 }
+
+/* ========================================================
+   URBANNEST EDITORIAL BRAND LOADER & PAGE TRANSITION ANIMATIONS
+   Hardware-accelerated (transform & opacity only)
+   ======================================================== */
+@keyframes un-logo-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes un-line-reveal {
+  0% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes un-text-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes un-dot-pulse {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes un-arch-hairline {
+  0% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  100% {
+    opacity: 0.25;
+    transform: scaleX(1);
+  }
+}
+
+.un-logo-reveal {
+  animation: un-logo-fade-in 450ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
+}
+
+.un-line-expand {
+  transform-origin: center;
+  animation: un-line-reveal 400ms cubic-bezier(0.16, 1, 0.3, 1) 450ms both;
+}
+
+.un-text-reveal {
+  animation: un-text-fade-up 400ms cubic-bezier(0.16, 1, 0.3, 1) 600ms both;
+}
+
+.un-arch-line {
+  transform-origin: center;
+  animation: un-arch-hairline 550ms cubic-bezier(0.16, 1, 0.3, 1) 200ms both;
+}
+
+.un-dot-pulse-1 {
+  animation: un-dot-pulse 1200ms ease-in-out infinite 700ms;
+}
+
+.un-dot-pulse-2 {
+  animation: un-dot-pulse 1200ms ease-in-out infinite 900ms;
+}
+
+.un-dot-pulse-3 {
+  animation: un-dot-pulse 1200ms ease-in-out infinite 1100ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .un-logo-reveal,
+  .un-line-expand,
+  .un-text-reveal,
+  .un-arch-line,
+  .un-dot-pulse-1,
+  .un-dot-pulse-2,
+  .un-dot-pulse-3 {
+    animation: none !important;
+    transition: opacity 0.15s ease !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

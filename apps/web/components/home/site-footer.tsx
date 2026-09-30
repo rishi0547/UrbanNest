@@ -1,13 +1,14 @@
 import Link from "next/link";
+import { Mail, Phone, MapPin, Clock } from "lucide-react";
 
 const footerLinks = {
   shop: [
     { href: "/products", label: "All Products" },
     { href: "/products?category=living-room", label: "Sofas & Couches" },
-    { href: "/products?category=living-room", label: "Chairs" },
-    { href: "/products?category=dining-room", label: "Tables" },
-    { href: "/products?category=bedroom", label: "Beds" },
-    { href: "/products?category=home-office", label: "Storage" },
+    { href: "/products?category=living-room", label: "Chairs & Lounges" },
+    { href: "/products?category=dining-room", label: "Dining Tables" },
+    { href: "/products?category=bedroom", label: "Beds & Nightstands" },
+    { href: "/products?category=storage", label: "Storage & Sideboards" },
   ],
   company: [
     { href: "/products", label: "About Us" },
@@ -17,42 +18,43 @@ const footerLinks = {
     { href: "/products", label: "Lookbook" },
   ],
   service: [
-    { href: "mailto:hello@urbannest.com", label: "Contact Us" },
-    { href: "/orders", label: "Track Order" },
+    { href: "/orders", label: "Track Your Order" },
     { href: "/profile", label: "My Account" },
     { href: "/orders", label: "Returns & Exchanges" },
-    { href: "/products", label: "Design Advice" },
+    { href: "/products", label: "Shipping Policy" },
+    { href: "mailto:hello@urbannest.com", label: "Contact Us" },
   ],
 };
 
 export function SiteFooter() {
   return (
-    <footer className="bg-[#F8F6F2] border-t border-[#E5E2DC] pt-8 sm:pt-10 lg:pt-10 pb-12 sm:pb-16 lg:pb-16 text-[#1A1A1A]">
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-        {/* Four Column Balanced Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-          {/* Column 1: Brand Statement (4 cols) */}
-          <div className="lg:col-span-4 space-y-6">
+    <footer className="bg-[#F8F6F2] border-t border-[#E5E2DC] pt-12 sm:pt-16 pb-12 text-[#1A1A1A]">
+      {/* Unified 1440px Master Container */}
+      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        {/* 5-Column Balanced Grid Inspired by Reference */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 pb-12 border-b border-[#E5E2DC]">
+          {/* Column 1: Brand & Bio (4 cols) */}
+          <div className="lg:col-span-4 space-y-4 pr-0 lg:pr-6">
             <Link href="/" className="inline-block">
-              <span className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-[#1A1A1A]">
+              <span className="font-heading text-2xl sm:text-[28px] font-bold tracking-tight text-[#1A1A1A]">
                 UrbanNest<span className="text-[#5D6B4D]">.</span>
               </span>
-              <span className="block text-[9px] uppercase tracking-[0.3em] text-[#6B7280] -mt-0.5 font-medium">
-                Furniture
+              <span className="block text-[9px] uppercase tracking-[0.3em] text-[#6B7280] -mt-1 font-medium">
+                Furniture &amp; Living
               </span>
             </Link>
 
-            <p className="text-sm text-[#6B7280] leading-relaxed font-light max-w-sm">
-              Timeless furniture, thoughtfully designed for modern living.
-              Sustainably harvested solid hardwoods, organic textiles, and
-              enduring craftsmanship.
+            <p className="text-xs sm:text-sm text-[#6B7280] leading-relaxed font-light max-w-sm">
+              Thoughtfully designed handcrafted furniture and decor to help you
+              create a sanctuary you truly love. Sustainably harvested hardwoods
+              and timeless craftsmanship.
             </p>
 
             {/* Social Icons */}
-            <div className="flex items-center gap-2.5 pt-2">
+            <div className="flex items-center gap-2 pt-2">
               <a
                 href="#"
-                className="size-9 rounded-full border border-[#E5E2DC] bg-white flex items-center justify-center text-[#1A1A1A] hover:bg-[#F0EDE8] hover:border-[#5D6B4D]/40 transition-colors shadow-2xs"
+                className="size-8.5 rounded-full border border-[#E5E2DC] bg-white flex items-center justify-center text-[#1A1A1A] hover:bg-[#5D6B4D] hover:text-white hover:border-[#5D6B4D] transition-colors shadow-2xs"
                 title="Instagram"
               >
                 <svg className="size-3.5 fill-current" viewBox="0 0 24 24">
@@ -61,16 +63,7 @@ export function SiteFooter() {
               </a>
               <a
                 href="#"
-                className="size-9 rounded-full border border-[#E5E2DC] bg-white flex items-center justify-center text-[#1A1A1A] hover:bg-[#F0EDE8] hover:border-[#5D6B4D]/40 transition-colors shadow-2xs"
-                title="Facebook"
-              >
-                <svg className="size-3.5 fill-current" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-              </a>
-              <a
-                href="#"
-                className="size-9 rounded-full border border-[#E5E2DC] bg-white flex items-center justify-center text-[#1A1A1A] hover:bg-[#F0EDE8] hover:border-[#5D6B4D]/40 transition-colors shadow-2xs"
+                className="size-8.5 rounded-full border border-[#E5E2DC] bg-white flex items-center justify-center text-[#1A1A1A] hover:bg-[#5D6B4D] hover:text-white hover:border-[#5D6B4D] transition-colors shadow-2xs"
                 title="Pinterest"
               >
                 <svg className="size-3.5 fill-current" viewBox="0 0 24 24">
@@ -79,8 +72,8 @@ export function SiteFooter() {
               </a>
               <a
                 href="#"
-                className="size-9 rounded-full border border-[#E5E2DC] bg-white flex items-center justify-center text-[#1A1A1A] hover:bg-[#F0EDE8] hover:border-[#5D6B4D]/40 transition-colors shadow-2xs"
-                title="X / Twitter"
+                className="size-8.5 rounded-full border border-[#E5E2DC] bg-white flex items-center justify-center text-[#1A1A1A] hover:bg-[#5D6B4D] hover:text-white hover:border-[#5D6B4D] transition-colors shadow-2xs"
+                title="X"
               >
                 <svg className="size-3.5 fill-current" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -91,15 +84,15 @@ export function SiteFooter() {
 
           {/* Column 2: Shop (2 cols) */}
           <div className="lg:col-span-2">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] mb-5">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] mb-4">
               Shop
             </h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {footerLinks.shop.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-xs sm:text-[13px] text-[#6B7280] hover:text-[#1A1A1A] transition-colors font-light"
+                    className="text-xs sm:text-sm text-[#6B7280] hover:text-[#5D6B4D] transition-colors font-light"
                   >
                     {link.label}
                   </Link>
@@ -108,17 +101,36 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Column 3: Company (2 cols) */}
+          {/* Column 3: Customer Care (2 cols) */}
           <div className="lg:col-span-2">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] mb-5">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] mb-4">
+              Customer Care
+            </h4>
+            <ul className="space-y-2.5">
+              {footerLinks.service.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-xs sm:text-sm text-[#6B7280] hover:text-[#5D6B4D] transition-colors font-light"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4: Company (2 cols) */}
+          <div className="lg:col-span-2">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] mb-4">
               Company
             </h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {footerLinks.company.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-xs sm:text-[13px] text-[#6B7280] hover:text-[#1A1A1A] transition-colors font-light"
+                    className="text-xs sm:text-sm text-[#6B7280] hover:text-[#5D6B4D] transition-colors font-light"
                   >
                     {link.label}
                   </Link>
@@ -127,58 +139,45 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Column 4: Customer Service & Need Help (4 cols) */}
-          <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10">
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] mb-5">
-                Service
-              </h4>
-              <ul className="space-y-3">
-                {footerLinks.service.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-xs sm:text-[13px] text-[#6B7280] hover:text-[#1A1A1A] transition-colors font-light"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] mb-5">
-                Concierge
-              </h4>
-              <div className="space-y-2.5 text-xs sm:text-[13px] text-[#6B7280] font-light">
-                <p className="hover:text-[#1A1A1A] transition-colors cursor-pointer">
-                  hello@urbannest.com
-                </p>
-                <p className="hover:text-[#1A1A1A] transition-colors cursor-pointer">
-                  +1 (800) 123-4567
-                </p>
-                <p className="text-[11px] text-[#6B7280]/80 pt-1">
-                  Mon - Fri: 9am - 6pm EST
-                </p>
-              </div>
+          {/* Column 5: Concierge / Contact (2 cols) */}
+          <div className="lg:col-span-2 space-y-3">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] mb-4">
+              Contact Us
+            </h4>
+            <div className="space-y-2 text-xs text-[#6B7280]">
+              <p className="flex items-center gap-2">
+                <Mail className="size-3.5 text-[#5D6B4D] shrink-0" />
+                <span>hello@urbannest.com</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <Phone className="size-3.5 text-[#5D6B4D] shrink-0" />
+                <span>+91 98765 43210</span>
+              </p>
+              <p className="flex items-start gap-2">
+                <MapPin className="size-3.5 text-[#5D6B4D] shrink-0 mt-0.5" />
+                <span>Indiranagar, Bangalore</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <Clock className="size-3.5 text-[#5D6B4D] shrink-0" />
+                <span>Mon-Sat: 10AM - 8PM</span>
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar with Generous Margin */}
-        <div className="border-t border-[#E5E2DC] mt-12 sm:mt-16 lg:mt-24 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#6B7280] font-light text-center sm:text-left">
-          <p>© {new Date().getFullYear()} UrbanNest Furniture. All rights reserved.</p>
-          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-6 gap-y-2">
-            <Link href="#" className="hover:text-[#1A1A1A] transition-colors py-1">
-              Privacy Policy
-            </Link>
-            <Link href="#" className="hover:text-[#1A1A1A] transition-colors py-1">
-              Terms of Service
-            </Link>
-            <Link href="#" className="hover:text-[#1A1A1A] transition-colors py-1">
-              Cookies Settings
-            </Link>
+        {/* Bottom Legal & Payment Badges */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#6B7280]">
+          <p>
+            &copy; {new Date().getFullYear()} UrbanNest Furniture. All rights reserved.
+          </p>
+
+          {/* Payment Method Badges */}
+          <div className="flex items-center gap-2.5 font-mono text-[10px] uppercase tracking-wider text-[#9CA3AF]">
+            <span className="px-2 py-0.5 bg-white border border-[#E5E2DC] rounded">Visa</span>
+            <span className="px-2 py-0.5 bg-white border border-[#E5E2DC] rounded">Mastercard</span>
+            <span className="px-2 py-0.5 bg-white border border-[#E5E2DC] rounded">UPI</span>
+            <span className="px-2 py-0.5 bg-white border border-[#E5E2DC] rounded">RuPay</span>
+            <span className="px-2 py-0.5 bg-white border border-[#E5E2DC] rounded">NetBanking</span>
           </div>
         </div>
       </div>

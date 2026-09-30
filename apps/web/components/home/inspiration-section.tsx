@@ -8,24 +8,21 @@ import { motion } from "framer-motion";
 
 const articles = [
   {
-    image:
-      "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=700&q=80&fit=crop",
+    image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=700&q=80&fit=crop",
     category: "Design Tips",
     title: "5 Ways to Style Your Dining Room",
     date: "May 12, 2026",
     readTime: "5 min read",
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=700&q=80&fit=crop",
+    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=700&q=80&fit=crop",
     category: "Inspiration",
     title: "Create a Calm & Cozy Bedroom",
     date: "April 28, 2026",
     readTime: "6 min read",
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=700&q=80&fit=crop",
+    image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=700&q=80&fit=crop",
     category: "Trends",
     title: "Top Interior Design Trends for 2026",
     date: "April 15, 2026",
@@ -35,19 +32,21 @@ const articles = [
 
 export function InspirationSection() {
   return (
-    <section className="pt-10 sm:pt-12 lg:pt-[50px] pb-12 sm:pb-14 lg:pb-[60px] bg-[#F8F6F2]">
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
-          {/* Left Text Content (3 cols) */}
+    <section className="pt-8 sm:pt-12 pb-12 sm:pb-16 bg-[#F8F6F2]">
+      {/* Unified 1440px Master Container */}
+      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          {/* Left Text Intro (3 Cols) */}
           <MotionWrapper className="lg:col-span-3 flex flex-col justify-between self-stretch pr-0 lg:pr-2">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#6B7280] mb-3">
-                Get Inspired
-              </p>
-              <h2 className="font-heading text-3xl sm:text-4xl font-normal leading-[1.12] text-[#1A1A1A] mb-4">
-                Designed to inspire<br />your home
+              <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#5D6B4D] mb-2 block">
+                Editorial
+              </span>
+              <h2 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-normal leading-[1.12] text-[#1A1A1A] mb-3">
+                Designed to inspire
+                <span className="block italic">your home</span>
               </h2>
-              <p className="text-sm text-[#6B7280] leading-relaxed font-light mb-8 max-w-xs">
+              <p className="text-xs sm:text-sm text-[#6B7280] leading-relaxed font-light mb-8 max-w-xs">
                 Explore architectural ideas and curated styling guides to create
                 spaces that feel uniquely yours.
               </p>
@@ -67,31 +66,31 @@ export function InspirationSection() {
             </div>
           </MotionWrapper>
 
-          {/* Right Three Editorial Article Cards (9 cols) */}
-          <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-3 gap-6 items-stretch">
+          {/* Right 3 Editorial Article Cards (9 Cols) */}
+          <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6 items-stretch">
             {articles.map((article, i) => (
               <MotionWrapper key={article.title} delay={i * 0.1} className="h-full">
-                <div className="group bg-white rounded-2xl border border-[#E5E2DC] p-4 shadow-2xs hover:shadow-lg transition-all duration-500 flex flex-col h-full justify-between">
-                  {/* Article Image - Equal 16/11 Ratio */}
+                <div className="group bg-white rounded-2xl border border-[#E5E2DC] p-3.5 sm:p-4 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col h-full justify-between">
+                  {/* Article Image Container */}
                   <div className="relative aspect-[16/11] w-full rounded-xl overflow-hidden bg-[#F0EDE8] mb-3.5">
                     <Image
                       src={article.image}
                       alt={article.title}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
-                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                     />
                   </div>
 
                   {/* Article Meta */}
                   <div className="flex flex-col flex-1">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#6B7280] mb-2 block">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5D6B4D] mb-1.5 block">
                       {article.category}
                     </span>
-                    <h3 className="text-sm sm:text-[15px] font-medium text-[#1A1A1A] group-hover:text-[#5D6B4D] transition-colors leading-snug line-clamp-2 mb-3">
+                    <h3 className="text-xs sm:text-sm font-medium text-[#1A1A1A] group-hover:text-[#5D6B4D] transition-colors leading-snug line-clamp-2 mb-3">
                       {article.title}
                     </h3>
-                    <div className="pt-3 border-t border-[#E5E2DC]/60 mt-auto flex items-center justify-between text-xs text-[#6B7280]">
+                    <div className="pt-2.5 border-t border-[#E5E2DC]/60 mt-auto flex items-center justify-between text-[11px] text-[#6B7280]">
                       <span>{article.date}</span>
                       <span>{article.readTime}</span>
                     </div>

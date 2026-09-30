@@ -3,6 +3,7 @@ import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { QueryProvider } from "@/providers/query-provider";
+import { PageTransitionProvider } from "@/providers/page-transition-provider";
 import { siteConfig } from "@/lib/site-config";
 
 const playfair = Playfair_Display({
@@ -85,7 +86,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn(playfair.variable, inter.variable)}>
       <body className="font-sans antialiased min-h-screen bg-background text-foreground">
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <PageTransitionProvider>{children}</PageTransitionProvider>
+        </QueryProvider>
       </body>
     </html>
   );

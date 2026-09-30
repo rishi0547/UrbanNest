@@ -2,147 +2,148 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight, Sparkles, Truck, RotateCcw, ShieldCheck, Headphones } from "lucide-react";
 import { MotionWrapper } from "./motion-wrapper";
 import { motion } from "framer-motion";
 
-const avatarUrls = [
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80&fit=crop&crop=face",
-];
-
 export function HeroSection() {
+  const benefits = [
+    {
+      icon: Sparkles,
+      title: "Premium Quality",
+      subtitle: "Crafted to Last",
+    },
+    {
+      icon: Truck,
+      title: "Free Shipping",
+      subtitle: "On Orders Over ₹9,999",
+    },
+    {
+      icon: RotateCcw,
+      title: "30-Day Returns",
+      subtitle: "Hassle-Free Returns",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Secure Checkout",
+      subtitle: "100% Safe Payments",
+    },
+    {
+      icon: Headphones,
+      title: "24/7 Support",
+      subtitle: "Dedicated Concierge",
+    },
+  ];
+
   return (
-    <section className="relative overflow-hidden bg-[#F8F6F2] pt-12 sm:pt-16 lg:pt-16 pb-8 sm:pb-10 lg:pb-10">
-      {/* Single Centered Content Container */}
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-14 items-center">
-          {/* Left Text Content (42% / 5 cols) */}
-          <MotionWrapper className="lg:col-span-5 flex flex-col justify-center">
-            {/* Collection Badge → 24px gap */}
-            <div className="inline-flex items-center gap-2.5 text-xs font-medium text-[#6B7280] mb-6">
-              <span className="size-2 rounded-full bg-[#D4A373]" />
-              New Collection 2026
-            </div>
+    <div className="relative w-full">
+      {/* ========================================================
+          FULL-BLEED HERO SECTION (No Outer Card, No Rounded Frame)
+          Background extends 100% across the viewport.
+          ======================================================== */}
+      <section className="relative w-full min-h-[560px] sm:min-h-[620px] lg:min-h-[680px] xl:min-h-[720px] flex items-center overflow-hidden bg-[#EBE7DF]">
+        {/* Full-width Background Image: Editorial Architecture & Modern Living */}
+        <Image
+          src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1800&q=85&fit=crop"
+          alt="UrbanNest curated architectural living room with bespoke furniture"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center sm:object-[center_35%]"
+        />
 
-            {/* Serif Heading: elegant 50px-52px desktop, 1.0 line-height, max-width ~520px */}
-            <h1 className="font-heading text-3xl sm:text-5xl lg:text-[50px] xl:text-[52px] font-normal leading-[1.0] tracking-tight text-[#1A1A1A] max-w-[520px] mb-8 break-words">
-              <span className="block">Crafted for Comfort.</span>
-              {/* Heading Line 1 → Heading Line 2: 12px gap */}
-              <span className="block mt-3 italic text-[#1A1A1A]">
-                Made for Life.
-              </span>
-            </h1>
+        {/* Editorial Scrim: Light Ivory Gradient on Left for Razor-Sharp Typography */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#F8F6F2]/90 via-[#F8F6F2]/82 to-[#F8F6F2]/70 sm:bg-gradient-to-r sm:from-[#F8F6F2]/95 sm:via-[#F8F6F2]/80 sm:to-transparent/10 w-full sm:w-[70%] lg:w-[56%] pointer-events-none" />
 
-            {/* Description: max 500px, 1.7 line-height → 32px gap */}
-            <p className="text-base sm:text-lg text-[#6B7280] leading-[1.7] max-w-[500px] mb-8 font-light">
-              Timeless design, premium materials, and unmatched comfort for
-              every space in your home.
-            </p>
-
-            {/* CTA Buttons: Responsive stack on mobile, single row on sm+ */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-7 w-full sm:w-auto">
-              <Link href="/products" className="w-full sm:w-auto">
-                <motion.span
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center justify-center gap-2.5 rounded-full bg-[#5D6B4D] hover:bg-[#4E5A40] text-white px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-semibold transition-colors shadow-2xs group cursor-pointer w-full sm:w-auto whitespace-nowrap min-h-[48px]"
-                >
-                  Shop Now
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                </motion.span>
-              </Link>
-
-              <Link href="/products?featured=true" className="w-full sm:w-auto">
-                <motion.span
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#E5E2DC] bg-white hover:bg-[#F0EDE8] text-[#1A1A1A] px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-medium transition-colors shadow-2xs cursor-pointer w-full sm:w-auto whitespace-nowrap min-h-[48px]"
-                >
-                  Explore Collections
-                </motion.span>
-              </Link>
-            </div>
-
-            {/* Customer Trust Row: Avatars & text aligned on same baseline, more spacing */}
-            <div className="flex items-center gap-4">
-              <div className="flex -space-x-2.5 shrink-0">
-                {avatarUrls.map((url, i) => (
-                  <div
-                    key={i}
-                    className="relative size-8 rounded-full border-2 border-[#F8F6F2] overflow-hidden shadow-2xs"
-                  >
-                    <Image
-                      src={url}
-                      alt="Verified buyer"
-                      fill
-                      className="object-cover"
-                      sizes="32px"
-                    />
-                  </div>
-                ))}
+        {/* Inner Content Container — Aligned strictly to Global 1440px Grid */}
+        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+          <MotionWrapper>
+            <div className="max-w-2xl flex flex-col justify-center">
+              {/* Eyebrow Pill */}
+              <div className="inline-flex items-center gap-2 mb-4 sm:mb-5">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.25em] text-[#5D6B4D]">
+                  Designed For Beautiful Living
+                </span>
               </div>
-              <p className="text-xs sm:text-[13px] text-[#6B7280]">
-                Trusted by{" "}
-                <span className="font-semibold text-[#1A1A1A]">25,000+</span>{" "}
-                happy customers
+
+              {/* Editorial Serif Headline */}
+              <h1 className="font-heading text-4xl sm:text-5xl lg:text-[58px] xl:text-[66px] font-normal leading-[1.05] tracking-tight text-[#1A1A1A]">
+                Modern Furniture.
+                <span className="block mt-1 sm:mt-2 italic font-normal text-[#1A1A1A]">
+                  Timeless Comfort.
+                </span>
+              </h1>
+
+              {/* Supporting Copy */}
+              <p className="mt-4 sm:mt-5 text-sm sm:text-base lg:text-[17px] text-[#6B7280] leading-relaxed font-light max-w-lg mb-8 sm:mb-10">
+                Curated furniture and home decor pieces that bring style, comfort,
+                and functionality to your home &mdash; every day.
               </p>
-            </div>
-          </MotionWrapper>
 
-          {/* Right Hero Image (58% / 7 cols): Vertically centered with text block */}
-          <MotionWrapper delay={0.15} className="lg:col-span-7 relative">
-            <div className="relative aspect-[4/3] rounded-[32px] overflow-hidden shadow-sm border border-[#E5E2DC]/60">
-              <Image
-                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1400&q=85&fit=crop"
-                alt="Modern luxury warm living room with bespoke furniture"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 58vw"
-                priority
-              />
-            </div>
-
-            {/* Floating Info Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-              className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 bg-white/95 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 shadow-xl border border-[#E5E2DC] flex items-center justify-between gap-3 sm:gap-4 max-w-[calc(100%-2rem)] sm:max-w-[280px]"
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative size-11 rounded-xl bg-[#F0EDE8] overflow-hidden shrink-0">
-                  <Image
-                    src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=120&q=80&fit=crop"
-                    alt="Living room thumbnail"
-                    fill
-                    className="object-cover"
-                    sizes="44px"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-[#1A1A1A] truncate">
-                    Modern Living Room
-                  </p>
-                  <Link
-                    href="/products"
-                    className="text-[11px] text-[#6B7280] hover:text-[#5D6B4D] transition-colors flex items-center gap-1 mt-0.5"
+              {/* CTA Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4">
+                <Link href="/products" className="w-full sm:w-auto">
+                  <motion.span
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1A1A1A] hover:bg-[#5D6B4D] text-white px-8 py-3.5 sm:py-4 text-xs sm:text-sm font-semibold tracking-wide transition-colors shadow-sm cursor-pointer w-full sm:w-auto min-h-[48px]"
                   >
-                    Shop the look <ArrowRight className="size-2.5" />
-                  </Link>
-                </div>
-              </div>
+                    SHOP NOW
+                    <ArrowRight className="size-4" />
+                  </motion.span>
+                </Link>
 
-              <div className="flex items-center gap-1 bg-[#F8F6F2] px-2 py-1 rounded-lg shrink-0 border border-[#E5E2DC]/60">
-                <span className="text-xs font-bold text-[#1A1A1A]">4.9</span>
-                <Star className="size-3 fill-amber-400 text-amber-400" />
+                <Link href="/products?featured=true" className="w-full sm:w-auto">
+                  <motion.span
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-white/90 hover:bg-white border border-[#E5E2DC] text-[#1A1A1A] px-8 py-3.5 sm:py-4 text-xs sm:text-sm font-medium tracking-wide transition-colors shadow-2xs cursor-pointer w-full sm:w-auto min-h-[48px]"
+                  >
+                    EXPLORE COLLECTION
+                  </motion.span>
+                </Link>
               </div>
-            </motion.div>
+            </div>
           </MotionWrapper>
         </div>
+      </section>
+
+      {/* ========================================================
+          SERVICE BENEFITS STRIP
+          Floating card nested directly below the full-width hero,
+          aligned to the 1440px global container.
+          ======================================================== */}
+      <div className="relative z-20 -mt-6 sm:-mt-8 lg:-mt-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <MotionWrapper delay={0.1}>
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#E5E2DC] p-4 sm:p-6 shadow-sm">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 sm:gap-6 divide-y md:divide-y-0 md:divide-x divide-[#E5E2DC]/80">
+              {benefits.map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={item.title}
+                    className={`flex items-center gap-3 sm:gap-4 ${
+                      idx !== 0 ? "pt-3 md:pt-0 md:pl-4 lg:pl-6" : ""
+                    }`}
+                  >
+                    <div className="size-10 sm:size-11 rounded-full bg-[#F8F6F2] border border-[#E5E2DC] flex items-center justify-center shrink-0">
+                      <Icon className="size-4 sm:size-5 text-[#5D6B4D] stroke-[1.6]" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-xs sm:text-sm font-semibold text-[#1A1A1A] truncate">
+                        {item.title}
+                      </h3>
+                      <p className="text-[11px] text-[#6B7280] font-light truncate mt-0.5">
+                        {item.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </MotionWrapper>
       </div>
-    </section>
+    </div>
   );
 }

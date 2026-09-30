@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const supabase = await createClient();
-  const featuredProducts = await getFeaturedProducts(4, supabase);
+  const featuredProducts = await getFeaturedProducts(8, supabase);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F6F2]">
