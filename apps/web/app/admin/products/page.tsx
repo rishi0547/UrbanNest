@@ -1,289 +1,169 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import Image from "next/image"
-import { Plus, ArrowLeft, Package, ExternalLink, Edit } from "lucide-react"
-import { requireAdmin } from "@/features/auth/roles"
-import { createClient } from "@/lib/supabase/server"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Plus, ArrowLeft, Package, CheckCircle2, AlertTriangle, ChevronRight } from "lucide-react";
+import { requireAdmin } from "@/features/auth/roles";
+import { createClient } from "@/lib/supabase/server";
+import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { DeleteProductButton } from "@/features/products/components/delete-product-button"
-import { formatINR } from "@/utils/currency"
-import { SafeProductImage } from "@/components/ProductImageFallback"
+  AdminProductsCatalog,
+  type ProductRecord,
+  type CategoryRecord,
+} from "@/features/products/components/admin-products-catalog";
 
 export const metadata: Metadata = {
-  title: "Product Catalog Management",
-  description: "Manage catalog inventory, pricing, stock levels, and publication status.",
+  title: "Product Catalog | UrbanNest Admin",
+  description: "Manage furniture catalog inventory, pricing, stock levels, and publication status.",
   robots: {
     index: false,
     follow: false,
   },
-}
+};
 
-interface ProductRecord {
-  id: string
-  title: string
-  slug: string
-  description: string | null
-  price: number
-  stock: number
-  images: string[] | null
-  is_featured: boolean
-  is_published: boolean
-  created_at: string
-  category_id: string | null
-  category: {
-    id: string
-    name: string
-    slug: string
-  } | null
-}
+export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
-  await requireAdmin()
-  const supabase = await createClient()
+  await requireAdmin("/admin/products");
+  const supabase = await createClient();
 
-  const { data: rawProducts, error } = await supabase
-    .from("products")
-    .select(`
-      id,
-      title,
-      slug,
-      description,
-      price,
-      stock,
-      images,
-      is_featured,
-      is_published,
-      created_at,
-      category_id,
-      category:categories (
+  // Fetch all products with category details and categories list
+  const [productsRes, categoriesRes] = await Promise.all([
+    supabase
+      .from("products")
+      .select(`
         id,
-        name,
-        slug
-      )
-    `)
-    .order("created_at", { ascending: false })
+        title,
+        slug,
+        description,
+        price,
+        stock,
+        images,
+        image_url,
+        is_featured,
+        is_published,
+        created_at,
+        category_id,
+        category:categories (
+          id,
+          name,
+          slug
+        )
+      `)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("categories")
+      .select("id, name, slug")
+      .order("name", { ascending: true }),
+  ]);
 
-  const products = (rawProducts || []) as unknown as ProductRecord[]
+  const products = (productsRes.data || []) as unknown as ProductRecord[];
+  const categories = (categoriesRes.data || []) as CategoryRecord[];
 
-  const totalCount = products.length
-  const publishedCount = products.filter((p) => p.is_published).length
-  const lowStockCount = products.filter((p) => p.stock <= 5).length
+  const totalCount = products.length;
+  const publishedCount = products.filter((p) => p.is_published).length;
+  const lowStockCount = products.filter((p) => p.stock <= 5).length;
 
   return (
-    <main className="container mx-auto max-w-6xl px-4 py-8 space-y-6">
-      {/* Navigation Breadcrumb & Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/60 pb-5">
-        <div className="space-y-1">
-          <Link
-            href="/admin"
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-1"
-          >
-            <ArrowLeft className="size-3.5" />
-            Back to Dashboard
-          </Link>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-              Product Catalog
-            </h1>
-            <Badge variant="secondary" className="font-mono text-xs">
-              {totalCount} Total
-            </Badge>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Manage your furniture catalog, inventory, pricing, and visual merchandising.
-          </p>
-        </div>
-
-        <Link href="/admin/products/new" className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto font-semibold shadow-xs min-h-[40px]">
-            <Plus className="size-4 mr-1.5" />
-            Add Product
-          </Button>
-        </Link>
-      </div>
-
-      {/* Metrics Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="border-border bg-card/50">
-          <CardHeader className="py-3 px-4">
-            <CardDescription className="text-xs uppercase font-medium">Total Products</CardDescription>
-            <CardTitle className="text-2xl font-bold">{totalCount}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card className="border-border bg-card/50">
-          <CardHeader className="py-3 px-4">
-            <CardDescription className="text-xs uppercase font-medium">Active Storefront</CardDescription>
-            <CardTitle className="text-2xl font-bold text-emerald-500">{publishedCount}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card className="border-border bg-card/50">
-          <CardHeader className="py-3 px-4">
-            <CardDescription className="text-xs uppercase font-medium">Low Stock (&le; 5)</CardDescription>
-            <CardTitle className={`text-2xl font-bold ${lowStockCount > 0 ? "text-amber-500" : "text-muted-foreground"}`}>
-              {lowStockCount}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-      </div>
-
-      {/* Error state if Supabase query failed */}
-      {error && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-          Database error loading products: {error.message}
-        </div>
-      )}
-
-      {/* Product List Table / Empty State */}
-      {products.length === 0 ? (
-        <Card className="border-dashed border-border py-16 text-center">
-          <CardContent className="space-y-4 max-w-sm mx-auto">
-            <div className="mx-auto size-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-              <Package className="size-6" />
+    <div className="py-8 sm:py-10">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 space-y-8">
+        
+        {/* Navigation Breadcrumb & Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#E5E2DC] pb-6">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 text-xs text-[#6B7280]">
+              <Link href="/admin" className="hover:text-[#1A1A1A] transition-colors">
+                Admin Console
+              </Link>
+              <ChevronRight className="size-3 text-[#A3A3A3]" />
+              <span className="text-[#1A1A1A] font-medium">Catalog</span>
             </div>
-            <div>
-              <h3 className="font-semibold text-lg">No products found</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Your catalog is currently empty. Add your first handcrafted furniture piece to get started.
+            <div className="flex items-center gap-3">
+              <h1 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[#1A1A1A]">
+                Product Catalog
+              </h1>
+              <span className="rounded-full bg-[#5D6B4D]/10 text-[#5D6B4D] border border-[#5D6B4D]/20 px-2.5 py-0.5 text-xs font-bold font-mono">
+                {totalCount} Total
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-[#6B7280]">
+              Manage your furniture catalog, inventory, pricing and merchandising.
+            </p>
+          </div>
+
+          <Link href="/admin/products/new" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto rounded-lg bg-[#5D6B4D] hover:bg-[#4E5A40] text-white font-semibold text-xs px-4 h-10 shadow-xs flex items-center justify-center gap-1.5">
+              <Plus className="size-4" />
+              <span>Add Product</span>
+            </Button>
+          </Link>
+        </div>
+
+        {/* Compact Summary Metrics Bar */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Total Products */}
+          <div className="rounded-xl border border-[#E5E2DC] bg-white p-5 shadow-2xs flex items-center justify-between">
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">
+                Total Products
+              </span>
+              <div className="font-heading text-2xl sm:text-3xl font-bold text-[#1A1A1A]">
+                {totalCount}
+              </div>
+              <p className="text-[11px] text-[#6B7280]">Catalog database entries</p>
+            </div>
+            <div className="size-10 rounded-lg bg-[#5D6B4D]/10 text-[#5D6B4D] flex items-center justify-center shrink-0">
+              <Package className="size-5" />
+            </div>
+          </div>
+
+          {/* Active Storefront */}
+          <div className="rounded-xl border border-[#E5E2DC] bg-white p-5 shadow-2xs flex items-center justify-between">
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">
+                Active Storefront
+              </span>
+              <div className="font-heading text-2xl sm:text-3xl font-bold text-emerald-700">
+                {publishedCount}
+              </div>
+              <p className="text-[11px] text-emerald-700 font-medium">Visible to customer buyers</p>
+            </div>
+            <div className="size-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="size-5" />
+            </div>
+          </div>
+
+          {/* Low Stock */}
+          <div className="rounded-xl border border-[#E5E2DC] bg-white p-5 shadow-2xs flex items-center justify-between">
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">
+                Low Stock (&le; 5 units)
+              </span>
+              <div className={`font-heading text-2xl sm:text-3xl font-bold ${lowStockCount > 0 ? "text-amber-700" : "text-[#6B7280]"}`}>
+                {lowStockCount}
+              </div>
+              <p className="text-[11px] text-[#6B7280]">
+                {lowStockCount > 0 ? "Requires restock replenishment" : "Inventory levels healthy"}
               </p>
             </div>
-            <Link href="/admin/products/new">
-              <Button className="mt-2">
-                <Plus className="size-4 mr-1.5" />
-                Add Your First Product
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="border-border overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="bg-muted/40 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
-                <tr>
-                  <th className="py-3 px-4">Product</th>
-                  <th className="py-3 px-4">Category</th>
-                  <th className="py-3 px-4">Price</th>
-                  <th className="py-3 px-4">Stock</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {products.map((product) => {
-                  const thumbnail = (product as any).image_url || product.images?.[0]
-                  return (
-                    <tr
-                      key={product.id}
-                      className="hover:bg-muted/30 transition-colors group"
-                    >
-                      {/* Product Thumbnail & Name */}
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="relative size-12 rounded-md overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center">
-                            <SafeProductImage
-                              src={thumbnail}
-                              alt={product.title}
-                              fill
-                              sizes="48px"
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="font-semibold text-foreground truncate max-w-xs group-hover:text-primary transition-colors">
-                              {product.title}
-                            </div>
-                            <div className="text-xs font-mono text-muted-foreground truncate max-w-xs">
-                              /{product.slug}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Category */}
-                      <td className="py-3 px-4">
-                        {product.category ? (
-                          <Badge variant="outline" className="font-medium text-xs">
-                            {product.category.name}
-                          </Badge>
-                        ) : (
-                          <span className="text-xs text-muted-foreground italic">Unassigned</span>
-                        )}
-                      </td>
-
-                      {/* Price */}
-                      <td className="py-3 px-4 font-mono font-medium">
-                        {formatINR(Number(product.price))}
-                      </td>
-
-                      {/* Stock */}
-                      <td className="py-3 px-4">
-                        {product.stock === 0 ? (
-                          <Badge variant="destructive" className="text-xs">Out of Stock</Badge>
-                        ) : product.stock <= 5 ? (
-                          <Badge variant="secondary" className="text-xs text-amber-500 border-amber-500/30">
-                            {product.stock} Left
-                          </Badge>
-                        ) : (
-                          <span className="text-xs font-medium text-foreground">{product.stock} units</span>
-                        )}
-                      </td>
-
-                      {/* Status Badges */}
-                      <td className="py-3 px-4">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          {product.is_published ? (
-                            <Badge variant="success" className="text-xs">
-                              Active
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary" className="text-xs">
-                              Draft
-                            </Badge>
-                          )}
-                          {product.is_featured && (
-                            <Badge variant="default" className="text-xs bg-primary/20 text-primary border-primary/40">
-                              Featured
-                            </Badge>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Actions */}
-                      <td className="py-3 px-4 text-right">
-                        <div className="inline-flex items-center justify-end gap-1">
-                          <Link href={`/admin/products/${product.id}`}>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 px-2.5 text-muted-foreground hover:text-foreground"
-                              title="Edit product"
-                            >
-                              <Edit className="size-4" />
-                              <span className="sr-only">Edit</span>
-                            </Button>
-                          </Link>
-                          <DeleteProductButton
-                            productId={product.id}
-                            productName={product.title}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+            <div className={`size-10 rounded-lg flex items-center justify-center shrink-0 ${lowStockCount > 0 ? "bg-amber-50 text-amber-700" : "bg-gray-100 text-gray-400"}`}>
+              <AlertTriangle className="size-5" />
+            </div>
           </div>
-        </Card>
-      )}
-    </main>
-  )
+        </div>
+
+        {/* Database Error State if query failed */}
+        {productsRes.error && (
+          <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-700">
+            Database error loading products: {productsRes.error.message}
+          </div>
+        )}
+
+        {/* Interactive Catalog Component with Search, Multi-Filter, Sorting & Refined Table */}
+        <AdminProductsCatalog
+          initialProducts={products}
+          categories={categories}
+        />
+
+      </div>
+    </div>
+  );
 }

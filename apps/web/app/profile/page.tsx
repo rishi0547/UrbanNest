@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { ProfileView } from "@/features/profile/components/profile-view";
+import { StorefrontNav } from "@/components/storefront-nav";
+import { SiteFooter } from "@/components/home/site-footer";
+import {
+  ProfileView,
+  type UserOrderRecord,
+} from "@/features/profile/components/profile-view";
 
 export const metadata: Metadata = {
-  title: "My Profile",
-  description: "Manage your UrbanNest account, view orders, and edit your profile details.",
+  title: "My Account | UrbanNest",
+  description: "Manage your handcrafted furniture orders, personal profile, and account preferences.",
   robots: {
     index: false,
     follow: false,
@@ -14,14 +19,24 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function ProfilePage() {
+interface ProfilePageProps {
+  searchParams: Promise<{ redirectTo?: string }>;
+}
+
+export default async function ProfilePage(props: ProfilePageProps) {
+  const searchParams = await props.searchParams;
+  const redirectTo = searchParams?.redirectTo || null;
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login?redirectTo=/profile");
+    const target = redirectTo
+      ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
+      : "/login?redirectTo=/profile";
+    redirect(target);
   }
 
   // Fetch full user record from profiles table
@@ -31,18 +46,37 @@ export default async function ProfilePage() {
     .eq("id", user.id)
     .single();
 
-  // Fetch user orders summary
-  const { data: userOrders } = await supabase
+  // Fetch verified customer orders with items
+  const { data: rawOrders } = await supabase
     .from("orders")
-    .select("id, status")
-    .eq("user_id", user.id);
+    .select(`
+      id,
+      order_number,
+      status,
+      total,
+      total_amount,
+      created_at,
+      order_items (
+        id,
+        product_name,
+        quantity,
+        line_total
+      )
+    `)
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
 
-  const totalOrders = userOrders ? userOrders.length : 0;
-  const completedOrders = userOrders
-    ? userOrders.filter(
-        (o) => o.status === "delivered" || o.status === "completed"
-      ).length
-    : 0;
+  const userOrders = (rawOrders || []) as unknown as UserOrderRecord[];
+
+  const totalOrders = userOrders.length;
+  const completedOrders = userOrders.filter(
+    (o) => o.status === "delivered"
+  ).length;
+  const inProgressOrders = userOrders.filter((o) =>
+    ["pending", "processing", "shipped"].includes(o.status)
+  ).length;
+
+  const recentOrders = userOrders.slice(0, 4);
 
   const normalizedProfile = {
     fullName: profile?.full_name || user.user_metadata?.full_name || "Valued Patron",
@@ -53,17 +87,28 @@ export default async function ProfilePage() {
   };
 
   return (
-    <ProfileView
-      user={{
-        id: user.id,
-        email: user.email,
-        createdAt: user.created_at,
-      }}
-      profile={normalizedProfile}
-      ordersSummary={{
-        totalOrders,
-        completedOrders,
-      }}
-    />
+    <div className="min-h-screen flex flex-col bg-[#F8F6F2]">
+      <StorefrontNav />
+
+      <main className="flex-1">
+        <ProfileView
+          user={{
+            id: user.id,
+            email: user.email,
+            createdAt: user.created_at,
+          }}
+          profile={normalizedProfile}
+          ordersSummary={{
+            totalOrders,
+            completedOrders,
+            inProgressOrders,
+          }}
+          recentOrders={recentOrders}
+          redirectTo={redirectTo}
+        />
+      </main>
+
+      <SiteFooter />
+    </div>
   );
 }
