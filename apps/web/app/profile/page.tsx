@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { StorefrontNav } from "@/components/storefront-nav";
 import { SiteFooter } from "@/components/home/site-footer";
+import { getUserOrders } from "@/features/orders/api";
 import {
   ProfileView,
   type UserOrderRecord,
@@ -46,27 +47,8 @@ export default async function ProfilePage(props: ProfilePageProps) {
     .eq("id", user.id)
     .single();
 
-  // Fetch verified customer orders with items
-  const { data: rawOrders } = await supabase
-    .from("orders")
-    .select(`
-      id,
-      order_number,
-      status,
-      total,
-      total_amount,
-      created_at,
-      order_items (
-        id,
-        product_name,
-        quantity,
-        line_total
-      )
-    `)
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  const userOrders = (rawOrders || []) as unknown as UserOrderRecord[];
+  // Fetch verified customer orders using normalized order service
+  const userOrders = await getUserOrders(supabase, user.id);
 
   const totalOrders = userOrders.length;
   const completedOrders = userOrders.filter(
@@ -76,7 +58,7 @@ export default async function ProfilePage(props: ProfilePageProps) {
     ["pending", "processing", "shipped"].includes(o.status)
   ).length;
 
-  const recentOrders = userOrders.slice(0, 4);
+  const recentOrders = userOrders.slice(0, 4) as unknown as UserOrderRecord[];
 
   const normalizedProfile = {
     fullName: profile?.full_name || user.user_metadata?.full_name || "Valued Patron",

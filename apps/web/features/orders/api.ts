@@ -5,7 +5,7 @@ function getSupabase(client?: any) {
   return client || createClient();
 }
 
-function normalizeOrder(raw: any): Order {
+export function normalizeOrder(raw: any): Order {
   if (!raw) return raw;
   const items = (raw.order_items || []).map((item: any) => {
     const itemPrice = Number(item.product_price ?? item.price ?? 0);
@@ -50,10 +50,10 @@ function normalizeOrder(raw: any): Order {
 /**
  * Fetch orders belonging to the authenticated customer.
  */
-export async function getUserOrders(client?: any): Promise<Order[]> {
+export async function getUserOrders(client?: any, userId?: string): Promise<Order[]> {
   const supabase = getSupabase(client);
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("orders")
     .select(`
       id,
@@ -80,6 +80,12 @@ export async function getUserOrders(client?: any): Promise<Order[]> {
       )
     `)
     .order("created_at", { ascending: false });
+
+  if (userId) {
+    query = query.eq("user_id", userId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error(

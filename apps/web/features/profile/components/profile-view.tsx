@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ChevronRight,
@@ -32,7 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogoutButton } from "@/features/auth/components/logout-button";
-import { updateProfileAction } from "@/features/auth/actions";
+import { updateProfileAction } from "@/features/profile/actions";
 import { OrderStatusBadge } from "@/features/orders/components/order-status-badge";
 import { formatINR } from "@/utils/currency";
 
@@ -82,6 +83,11 @@ export function ProfileView({
   recentOrders = [],
   redirectTo,
 }: ProfileViewProps) {
+  const router = useRouter();
+  const [currentProfile, setCurrentProfile] = useState({
+    fullName: profile.fullName,
+    avatarUrl: profile.avatarUrl || "",
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState(profile.fullName);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl || "");
@@ -106,18 +112,34 @@ export function ProfileView({
 
   // Monogram / Avatar initials
   const initials =
-    fullName
+    currentProfile.fullName
       .split(" ")
       .filter(Boolean)
       .slice(0, 2)
       .map((part) => part[0]?.toUpperCase())
       .join("") || "UN";
 
-  const handleCopyUserId = () => {
-    if (typeof window !== "undefined" && navigator?.clipboard) {
-      navigator.clipboard.writeText(user.id);
-      setCopiedId(true);
-      setTimeout(() => setCopiedId(false), 2000);
+  const handleCopyUserId = async () => {
+    try {
+      if (typeof window !== "undefined" && navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(user.id);
+        setCopiedId(true);
+        setTimeout(() => setCopiedId(false), 2000);
+      } else if (typeof document !== "undefined") {
+        const textArea = document.createElement("textarea");
+        textArea.value = user.id;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        setCopiedId(true);
+        setTimeout(() => setCopiedId(false), 2000);
+      }
+    } catch {
+      // Gracefully handle clipboard errors
     }
   };
 
@@ -126,10 +148,13 @@ export function ProfileView({
     setIsSaving(true);
     setStatusMessage(null);
 
+    const trimmedName = fullName.trim();
+    const trimmedAvatar = avatarUrl.trim();
+
     try {
       const res = await updateProfileAction({
-        fullName,
-        avatarUrl: avatarUrl.trim() || undefined,
+        fullName: trimmedName,
+        avatarUrl: trimmedAvatar || undefined,
       });
 
       if (!res.success) {
@@ -138,11 +163,18 @@ export function ProfileView({
           text: res.error || "Failed to update profile. Please review details.",
         });
       } else {
+        setCurrentProfile({
+          fullName: trimmedName,
+          avatarUrl: trimmedAvatar,
+        });
+        setFullName(trimmedName);
+        setAvatarUrl(trimmedAvatar);
         setStatusMessage({
           type: "success",
           text: "Profile updated successfully.",
         });
         setIsEditing(false);
+        router.refresh();
       }
     } catch {
       setStatusMessage({
@@ -155,8 +187,9 @@ export function ProfileView({
   };
 
   const handleCancel = () => {
-    setFullName(profile.fullName);
-    setAvatarUrl(profile.avatarUrl || "");
+    setFullName(currentProfile.fullName);
+    setAvatarUrl(currentProfile.avatarUrl);
+    setAvatarError(false);
     setStatusMessage(null);
     setIsEditing(false);
   };
@@ -257,7 +290,7 @@ export function ProfileView({
               </div>
             </div>
 
-            <Link href="/admin" className="shrink-0">
+            <Link href={redirectTo || "/admin"} className="shrink-0">
               <Button
                 size="sm"
                 className="rounded-lg bg-[#5D6B4D] hover:bg-[#4E5A40] text-white text-xs font-semibold px-4 h-9 shadow-xs flex items-center gap-1.5"
@@ -313,10 +346,10 @@ export function ProfileView({
             <div className="flex flex-col min-[480px]:flex-row items-start min-[480px]:items-center gap-5">
               {/* Avatar Frame with Monogram or Image */}
               <div className="relative flex size-20 sm:size-24 shrink-0 items-center justify-center rounded-2xl bg-[#F0EDE8] border border-[#E5E2DC] text-[#1A1A1A] font-heading text-2xl sm:text-3xl font-bold tracking-tight shadow-inner overflow-hidden">
-                {avatarUrl && !avatarError ? (
+                {currentProfile.avatarUrl && !avatarError ? (
                   <Image
-                    src={avatarUrl}
-                    alt={fullName}
+                    src={currentProfile.avatarUrl}
+                    alt={currentProfile.fullName}
                     width={96}
                     height={96}
                     className="size-full object-cover"
@@ -331,7 +364,7 @@ export function ProfileView({
               <div className="space-y-1.5 min-w-0">
                 <div className="flex flex-wrap items-center gap-2.5">
                   <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-[#1A1A1A] break-words">
-                    {fullName}
+                    {currentProfile.fullName}
                   </h2>
                   {isAdmin ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-[#5D6B4D] text-white px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider shadow-2xs">
@@ -363,8 +396,12 @@ export function ProfileView({
               <Button
                 variant={isEditing ? "secondary" : "outline"}
                 onClick={() => {
-                  setIsEditing(!isEditing);
-                  setStatusMessage(null);
+                  if (isEditing) {
+                    handleCancel();
+                  } else {
+                    setIsEditing(true);
+                    setStatusMessage(null);
+                  }
                 }}
                 className="w-full sm:w-auto rounded-lg border-[#E5E2DC] bg-white text-xs font-semibold px-4 h-10 flex items-center justify-center gap-1.5 shadow-2xs hover:bg-[#F0EDE8]/60 transition-colors"
               >
@@ -670,7 +707,7 @@ export function ProfileView({
                 <UserIcon className="size-3.5 text-[#5D6B4D]" />
                 Full Name
               </span>
-              <p className="text-sm font-semibold text-[#1A1A1A]">{fullName}</p>
+              <p className="text-sm font-semibold text-[#1A1A1A]">{currentProfile.fullName}</p>
             </div>
 
             {/* Email Address */}
@@ -793,7 +830,7 @@ export function ProfileView({
             {/* Admin Dashboard shortcut if admin */}
             {isAdmin ? (
               <Link
-                href="/admin"
+                href={redirectTo || "/admin"}
                 className="group flex items-center justify-between p-4 rounded-xl border border-[#5D6B4D]/30 bg-[#5D6B4D]/5 hover:bg-[#5D6B4D] hover:border-[#5D6B4D] transition-all duration-200 shadow-2xs"
               >
                 <div className="flex items-center gap-3.5">
