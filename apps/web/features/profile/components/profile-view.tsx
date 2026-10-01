@@ -54,6 +54,42 @@ export interface UserOrderRecord {
   order_items?: OrderItemSummary[];
 }
 
+export function isValidImageUrl(url?: string | null): boolean {
+  if (!url || typeof url !== "string") return false;
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+  // If it contains HTML tags or whitespace, it cannot be a valid single URL
+  if (/<[a-z][\s\S]*>/i.test(trimmed) || /\s/.test(trimmed)) return false;
+  // Must start with http://, https://, or /
+  if (
+    !trimmed.startsWith("http://") &&
+    !trimmed.startsWith("https://") &&
+    !trimmed.startsWith("/")
+  ) {
+    return false;
+  }
+  try {
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+      const parsed = new URL(trimmed);
+      return Boolean(parsed.hostname);
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function extractUrlIfHtml(input: string): string {
+  if (!input) return "";
+  if (input.includes("<") && input.includes(">")) {
+    const match = input.match(/(?:src|href)=["']([^"']+)["']/i);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+  return input;
+}
+
 export interface ProfileViewProps {
   user: {
     id: string;
@@ -149,12 +185,21 @@ export function ProfileView({
     setStatusMessage(null);
 
     const trimmedName = fullName.trim();
-    const trimmedAvatar = avatarUrl.trim();
+    const rawAvatar = extractUrlIfHtml(avatarUrl.trim());
+
+    if (rawAvatar && !isValidImageUrl(rawAvatar)) {
+      setStatusMessage({
+        type: "error",
+        text: "Please provide a valid direct image URL starting with https:// or http://",
+      });
+      setIsSaving(false);
+      return;
+    }
 
     try {
       const res = await updateProfileAction({
         fullName: trimmedName,
-        avatarUrl: trimmedAvatar || undefined,
+        avatarUrl: rawAvatar || undefined,
       });
 
       if (!res.success) {
@@ -165,10 +210,10 @@ export function ProfileView({
       } else {
         setCurrentProfile({
           fullName: trimmedName,
-          avatarUrl: trimmedAvatar,
+          avatarUrl: rawAvatar,
         });
         setFullName(trimmedName);
-        setAvatarUrl(trimmedAvatar);
+        setAvatarUrl(rawAvatar);
         setStatusMessage({
           type: "success",
           text: "Profile updated successfully.",
@@ -346,9 +391,9 @@ export function ProfileView({
             <div className="flex flex-col min-[480px]:flex-row items-start min-[480px]:items-center gap-5">
               {/* Avatar Frame with Monogram or Image */}
               <div className="relative flex size-20 sm:size-24 shrink-0 items-center justify-center rounded-2xl bg-[#F0EDE8] border border-[#E5E2DC] text-[#1A1A1A] font-heading text-2xl sm:text-3xl font-bold tracking-tight shadow-inner overflow-hidden">
-                {currentProfile.avatarUrl && !avatarError ? (
+                {isValidImageUrl(currentProfile.avatarUrl) && !avatarError ? (
                   <Image
-                    src={currentProfile.avatarUrl}
+                    src={currentProfile.avatarUrl!}
                     alt={currentProfile.fullName}
                     width={96}
                     height={96}
@@ -465,7 +510,8 @@ export function ProfileView({
                       type="url"
                       value={avatarUrl}
                       onChange={(e) => {
-                        setAvatarUrl(e.target.value);
+                        const cleaned = extractUrlIfHtml(e.target.value);
+                        setAvatarUrl(cleaned);
                         setAvatarError(false);
                       }}
                       placeholder="https://images.unsplash.com/..."
@@ -476,26 +522,37 @@ export function ProfileView({
               </div>
 
               {/* Avatar Preview */}
-              {avatarUrl && (
+              {avatarUrl.trim() && (
                 <div className="p-3.5 rounded-lg bg-[#F8F6F2] border border-[#E5E2DC] flex items-center gap-3">
-                  <div className="size-10 rounded-lg overflow-hidden bg-white border border-[#E5E2DC] shrink-0">
-                    <Image
-                      src={avatarUrl}
-                      alt="Avatar Preview"
-                      width={40}
-                      height={40}
-                      className="size-full object-cover"
-                      onError={() => setAvatarError(true)}
-                    />
-                  </div>
-                  <div className="text-xs">
-                    <p className="font-semibold text-[#1A1A1A]">Avatar Preview</p>
-                    <p className="text-[11px] text-[#6B7280]">
-                      {avatarError
-                        ? "Unable to load image from this URL. Please verify the link."
-                        : "Image loaded and ready to save."}
-                    </p>
-                  </div>
+                  {isValidImageUrl(avatarUrl.trim()) ? (
+                    <>
+                      <div className="size-10 rounded-lg overflow-hidden bg-white border border-[#E5E2DC] shrink-0">
+                        <Image
+                          src={avatarUrl.trim()}
+                          alt="Avatar Preview"
+                          width={40}
+                          height={40}
+                          className="size-full object-cover"
+                          onError={() => setAvatarError(true)}
+                        />
+                      </div>
+                      <div className="text-xs">
+                        <p className="font-semibold text-[#1A1A1A]">Avatar Preview</p>
+                        <p className="text-[11px] text-[#6B7280]">
+                          {avatarError
+                            ? "Unable to load image from this URL. Please verify the direct image link."
+                            : "Image loaded and ready to save."}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-2.5 text-xs text-amber-800">
+                      <AlertCircle className="size-4 shrink-0 text-amber-600" />
+                      <span>
+                        Please enter a direct image URL (starting with https:// or http://). Attribution text or HTML tags cannot be used as an image URL.
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
 

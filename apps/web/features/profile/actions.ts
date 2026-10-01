@@ -29,7 +29,35 @@ export async function updateProfileAction(data: {
     };
   }
 
-  const avatarUrl = data.avatarUrl?.trim() || null;
+  let avatarUrl = data.avatarUrl?.trim() || null;
+  if (avatarUrl) {
+    if (avatarUrl.includes("<") && avatarUrl.includes(">")) {
+      const match = avatarUrl.match(/(?:src|href)=["']([^"']+)["']/i);
+      avatarUrl = match && match[1] ? match[1].trim() : null;
+    }
+    if (avatarUrl) {
+      if (
+        !avatarUrl.startsWith("http://") &&
+        !avatarUrl.startsWith("https://") &&
+        !avatarUrl.startsWith("/")
+      ) {
+        return {
+          success: false,
+          error: "Avatar URL must start with http://, https://, or /",
+        };
+      }
+      try {
+        if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) {
+          new URL(avatarUrl);
+        }
+      } catch {
+        return {
+          success: false,
+          error: "Please enter a valid image URL.",
+        };
+      }
+    }
+  }
 
   // Check if profile row exists
   const { data: existingProfile } = await supabase

@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/home/site-footer";
 import { getUserOrders } from "@/features/orders/api";
 import {
   ProfileView,
+  isValidImageUrl,
   type UserOrderRecord,
 } from "@/features/profile/components/profile-view";
 
@@ -60,11 +61,14 @@ export default async function ProfilePage(props: ProfilePageProps) {
 
   const recentOrders = userOrders.slice(0, 4) as unknown as UserOrderRecord[];
 
+  const rawAvatar = profile?.avatar_url || user.user_metadata?.avatar_url || null;
+  const safeAvatar = isValidImageUrl(rawAvatar) ? rawAvatar : null;
+
   const normalizedProfile = {
     fullName: profile?.full_name || user.user_metadata?.full_name || "Valued Patron",
     email: profile?.email || user.email || "No email registered",
     role: profile?.role || "customer",
-    avatarUrl: profile?.avatar_url || user.user_metadata?.avatar_url || null,
+    avatarUrl: safeAvatar,
     createdAt: profile?.created_at || user.created_at,
   };
 
