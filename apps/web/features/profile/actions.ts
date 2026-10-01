@@ -2,6 +2,7 @@
  
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { isValidImageUrl, extractUrlIfHtml } from "./utils";
 
 export type ProfileActionResult = {
   success: boolean;
@@ -29,34 +30,14 @@ export async function updateProfileAction(data: {
     };
   }
 
-  let avatarUrl = data.avatarUrl?.trim() || null;
-  if (avatarUrl) {
-    if (avatarUrl.includes("<") && avatarUrl.includes(">")) {
-      const match = avatarUrl.match(/(?:src|href)=["']([^"']+)["']/i);
-      avatarUrl = match && match[1] ? match[1].trim() : null;
-    }
-    if (avatarUrl) {
-      if (
-        !avatarUrl.startsWith("http://") &&
-        !avatarUrl.startsWith("https://") &&
-        !avatarUrl.startsWith("/")
-      ) {
-        return {
-          success: false,
-          error: "Avatar URL must start with http://, https://, or /",
-        };
-      }
-      try {
-        if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) {
-          new URL(avatarUrl);
-        }
-      } catch {
-        return {
-          success: false,
-          error: "Please enter a valid image URL.",
-        };
-      }
-    }
+  const rawAvatar = extractUrlIfHtml(data.avatarUrl?.trim() || "");
+  let avatarUrl: string | null = rawAvatar || null;
+
+  if (avatarUrl && !isValidImageUrl(avatarUrl)) {
+    return {
+      success: false,
+      error: "Please enter a valid image URL starting with http://, https://, or /",
+    };
   }
 
   // Check if profile row exists

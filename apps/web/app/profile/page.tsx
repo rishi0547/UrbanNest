@@ -6,9 +6,9 @@ import { SiteFooter } from "@/components/home/site-footer";
 import { getUserOrders } from "@/features/orders/api";
 import {
   ProfileView,
-  isValidImageUrl,
   type UserOrderRecord,
 } from "@/features/profile/components/profile-view";
+import { isValidImageUrl } from "@/features/profile/utils";
 
 export const metadata: Metadata = {
   title: "My Account | UrbanNest",
