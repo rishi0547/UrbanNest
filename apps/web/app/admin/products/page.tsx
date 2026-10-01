@@ -37,7 +37,6 @@ export default async function AdminProductsPage() {
         price,
         stock,
         images,
-        image_url,
         is_featured,
         is_published,
         created_at,
@@ -55,7 +54,11 @@ export default async function AdminProductsPage() {
       .order("name", { ascending: true }),
   ]);
 
-  const products = (productsRes.data || []) as unknown as ProductRecord[];
+  const rawProducts = (productsRes.data || []) as unknown as ProductRecord[];
+  const products: ProductRecord[] = rawProducts.map((p) => ({
+    ...p,
+    image_url: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : null,
+  }));
   const categories = (categoriesRes.data || []) as CategoryRecord[];
 
   const totalCount = products.length;
