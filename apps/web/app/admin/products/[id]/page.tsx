@@ -5,7 +5,7 @@ import { ArrowLeft, ChevronRight } from "lucide-react";
 import { requireAdmin } from "@/features/auth/roles";
 import { createClient } from "@/lib/supabase/server";
 import { ProductForm } from "@/features/products/components/product-form";
-import type { ProductInput } from "@/features/products/schemas";
+import { CANONICAL_CATEGORIES, type ProductInput } from "@/features/products/schemas";
 
 interface EditProductPageProps {
   params: Promise<{ id: string }>;
@@ -47,7 +47,10 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
   }
 
   const product = productRes.data;
-  const categories = categoriesRes.data || [];
+  const categories =
+    categoriesRes.data && categoriesRes.data.length > 0
+      ? categoriesRes.data
+      : CANONICAL_CATEGORIES.map((c) => ({ id: c.id, name: c.name }));
 
   const initialData: ProductInput = {
     name: product.title,
@@ -55,7 +58,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     description: product.description ?? "",
     price: Number(product.price),
     stock: Number(product.stock),
-    category_id: product.category_id ?? "",
+    category_id: product.category_id || categories[0]?.id || CANONICAL_CATEGORIES[0].id,
     featured: Boolean(product.is_featured),
     active: Boolean(product.is_published),
     images: Array.isArray(product.images) && product.images.length > 0 ? product.images : [],

@@ -19,7 +19,12 @@ import {
   Layers,
   ArrowRight,
 } from "lucide-react";
-import { productSchema, generateSlug, type ProductInput } from "../schemas";
+import {
+  productSchema,
+  generateSlug,
+  CANONICAL_CATEGORIES,
+  type ProductInput,
+} from "../schemas";
 import { createProductAction, updateProductAction } from "../actions";
 import { uploadProductImage } from "@/lib/supabase/storage";
 import { Button } from "@/components/ui/button";
@@ -28,6 +33,14 @@ export interface CategoryOption {
   id: string;
   name: string;
 }
+
+const CANONICAL_SORT_ORDER: Record<string, number> = {
+  "11111111-1111-1111-1111-111111111111": 1, // Living Room
+  "22222222-2222-2222-2222-222222222222": 2, // Bedroom
+  "33333333-3333-3333-3333-333333333333": 3, // Dining Room
+  "44444444-4444-4444-4444-444444444444": 4, // Home Office
+  "55555555-5555-5555-5555-555555555555": 5, // Storage
+};
 
 interface ProductFormProps {
   categories: CategoryOption[];
@@ -46,21 +59,41 @@ export function ProductForm({
   const [imageUrlInput, setImageUrlInput] = React.useState("");
   const [isUploading, setIsUploading] = React.useState(false);
 
+  const availableCategories = React.useMemo(() => {
+    const list =
+      categories && categories.length > 0
+        ? categories
+        : CANONICAL_CATEGORIES.map((c) => ({ id: c.id, name: c.name }));
+
+    return [...list].sort((a, b) => {
+      const orderA = CANONICAL_SORT_ORDER[a.id] ?? 99;
+      const orderB = CANONICAL_SORT_ORDER[b.id] ?? 99;
+      return orderA - orderB;
+    });
+  }, [categories]);
+
+  const defaultCategoryId =
+    initialData?.category_id && initialData.category_id.trim() !== ""
+      ? initialData.category_id
+      : availableCategories[0]?.id || CANONICAL_CATEGORIES[0].id;
+
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<ProductInput>({
     resolver: zodResolver(productSchema),
+    mode: "onChange",
     defaultValues: {
       name: initialData?.name ?? "",
       slug: initialData?.slug ?? "",
       description: initialData?.description ?? "",
       price: initialData?.price ?? 0,
       stock: initialData?.stock ?? 1,
-      category_id: initialData?.category_id ?? (categories[0]?.id || ""),
+      category_id: defaultCategoryId,
       featured: initialData?.featured ?? false,
       active: initialData?.active ?? true,
       images: initialData?.images ?? [],
@@ -425,10 +458,14 @@ export function ProductForm({
                 <select
                   id="category_id"
                   disabled={isSubmitting}
-                  {...register("category_id")}
+                  {...register("category_id", {
+                    onChange: () => {
+                      trigger("category_id");
+                    },
+                  })}
                   className="w-full h-10 px-3 rounded-lg border border-[#E5E2DC] bg-white text-xs sm:text-sm text-[#1A1A1A] focus:outline-none focus:border-[#5D6B4D] cursor-pointer shadow-2xs"
                 >
-                  {categories.map((cat) => (
+                  {availableCategories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.name}
                     </option>

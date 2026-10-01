@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronRight } from "lucide-react";
 import { requireAdmin } from "@/features/auth/roles";
 import { createClient } from "@/lib/supabase/server";
 import { ProductForm } from "@/features/products/components/product-form";
+import { CANONICAL_CATEGORIES } from "@/features/products/schemas";
 
 export const metadata: Metadata = {
   title: "Add New Product | UrbanNest Admin",
@@ -20,10 +21,14 @@ export default async function NewProductPage() {
   await requireAdmin("/admin/products/new");
   const supabase = await createClient();
 
-  const { data: categories } = await supabase
+  const { data: dbCategories } = await supabase
     .from("categories")
-    .select("id, name")
-    .order("name", { ascending: true });
+    .select("id, name");
+
+  const categories =
+    dbCategories && dbCategories.length > 0
+      ? dbCategories
+      : CANONICAL_CATEGORIES.map((c) => ({ id: c.id, name: c.name }));
 
   return (
     <div className="py-8 sm:py-10">

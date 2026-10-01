@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/features/auth/roles";
-import { productSchema, type ProductInput } from "./schemas";
+import {
+  productSchema,
+  CATEGORY_LOOKUP_TO_ID,
+  type ProductInput,
+} from "./schemas";
 
 export type ProductActionResult = {
   success: boolean;
@@ -27,6 +31,9 @@ export async function createProductAction(
     };
   }
 
+  const categoryId =
+    CATEGORY_LOOKUP_TO_ID[parsed.data.category_id] || parsed.data.category_id;
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
@@ -36,7 +43,7 @@ export async function createProductAction(
       description: parsed.data.description,
       price: parsed.data.price,
       stock: parsed.data.stock,
-      category_id: parsed.data.category_id,
+      category_id: categoryId,
       is_featured: parsed.data.featured,
       is_published: parsed.data.active,
       images: parsed.data.images,
@@ -52,6 +59,7 @@ export async function createProductAction(
   }
 
   revalidatePath("/admin/products");
+  revalidatePath("/products");
   revalidatePath("/");
   return { success: true, id: data.id };
 }
@@ -73,6 +81,9 @@ export async function updateProductAction(
     };
   }
 
+  const categoryId =
+    CATEGORY_LOOKUP_TO_ID[parsed.data.category_id] || parsed.data.category_id;
+
   const supabase = await createClient();
   const { error } = await supabase
     .from("products")
@@ -82,7 +93,7 @@ export async function updateProductAction(
       description: parsed.data.description,
       price: parsed.data.price,
       stock: parsed.data.stock,
-      category_id: parsed.data.category_id,
+      category_id: categoryId,
       is_featured: parsed.data.featured,
       is_published: parsed.data.active,
       images: parsed.data.images,
@@ -99,6 +110,7 @@ export async function updateProductAction(
 
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/${id}`);
+  revalidatePath("/products");
   revalidatePath("/");
   return { success: true, id };
 }
